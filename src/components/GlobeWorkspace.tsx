@@ -1,13 +1,6 @@
-import { useEffect, useRef, useState, type ComponentRef } from 'react'
+import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react'
 import Globe from 'react-globe.gl'
-
-const route = [{ startLat: -23.5505, startLng: -46.6333, endLat: 40.7128, endLng: -74.006 }]
-const places = [
-  { name: 'São Paulo', lat: -23.5505, lng: -46.6333 },
-  { name: 'New York', lat: 40.7128, lng: -74.006 },
-]
-
-const initialView = { lat: 8, lng: -61, altitude: 1.55 }
+import type { TripRoute } from '../data/tripScenario'
 
 function getDimensions() {
   const narrow = window.innerWidth <= 650
@@ -17,9 +10,25 @@ function getDimensions() {
   }
 }
 
-export function GlobeWorkspace() {
+export function GlobeWorkspace({ route }: { route: TripRoute }) {
   const globeRef = useRef<ComponentRef<typeof Globe> | undefined>(undefined)
   const [dimensions, setDimensions] = useState(getDimensions)
+  const initialView = useMemo(() => ({
+    lat: (route.origin.latitude + route.destination.latitude) / 2,
+    lng: (route.origin.longitude + route.destination.longitude) / 2,
+    altitude: 1.55,
+  }), [route])
+  const arcs = [{
+    startLat: route.origin.latitude,
+    startLng: route.origin.longitude,
+    endLat: route.destination.latitude,
+    endLng: route.destination.longitude,
+  }]
+  const places = [route.origin, route.destination].map(({ city, latitude, longitude }) => ({
+    name: city,
+    lat: latitude,
+    lng: longitude,
+  }))
 
   useEffect(() => {
     const updateDimensions = () => setDimensions(getDimensions())
@@ -30,7 +39,7 @@ export function GlobeWorkspace() {
   useEffect(() => {
     const timer = window.setTimeout(() => globeRef.current?.pointOfView(initialView, 0), 500)
     return () => window.clearTimeout(timer)
-  }, [])
+  }, [initialView])
 
   function changeZoom(direction: 'in' | 'out') {
     const current = globeRef.current?.pointOfView()
@@ -40,7 +49,7 @@ export function GlobeWorkspace() {
   }
 
   return (
-    <section className="globe-workspace" aria-label="Interactive globe showing an illustrative São Paulo to New York route">
+    <section className="globe-workspace" aria-label={`Interactive globe showing an illustrative ${route.origin.city} to ${route.destination.city} route`}>
       <Globe
         ref={globeRef}
         width={dimensions.width}
@@ -50,7 +59,7 @@ export function GlobeWorkspace() {
         showAtmosphere
         atmosphereColor="#48c8e4"
         atmosphereAltitude={0.1}
-        arcsData={route}
+        arcsData={arcs}
         arcColor={() => '#57e5f1'}
         arcAltitude={0.25}
         arcStroke={0.7}

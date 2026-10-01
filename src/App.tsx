@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Badge, Button, Card, Surface } from './components/ui'
 import { RouteMapPreview } from './components/RouteMapPreview'
+import { atlasTravelScenario } from './data/tripScenario'
 import './styles/app.css'
 
 const GlobeWorkspace = lazy(() =>
@@ -8,6 +9,8 @@ const GlobeWorkspace = lazy(() =>
 )
 
 export default function App() {
+  const route = atlasTravelScenario.request.route
+
   return (
     <main className="application-shell" id="workspace">
       <header className="application-header">
@@ -18,7 +21,7 @@ export default function App() {
         <div className="header-actions">
           <Badge tone="muted">Demonstration</Badge>
           <Button className="assistant-toggle" tone="quiet" type="button" disabled aria-label="AI Assistant is unavailable in this preview">
-            <span>Assistente IA</span>
+            <span>AI Assistant</span>
             <span className="switch-track" aria-hidden="true"><span /></span>
           </Button>
         </div>
@@ -26,7 +29,7 @@ export default function App() {
 
       <div className="workspace">
         <Suspense fallback={<div className="globe-loading" role="status">Loading interactive globe…</div>}>
-          <GlobeWorkspace />
+          <GlobeWorkspace route={route} />
         </Suspense>
 
         <Surface as="aside" className="planning-rail planning-rail--left" label="Route overview">
@@ -35,21 +38,21 @@ export default function App() {
             <Badge>Illustrative</Badge>
           </div>
           <Card className="mini-map-card" label="Map preview of the simulated route">
-            <RouteMapPreview />
-            <p className="map-caption">São Paulo <span>→</span> New York</p>
+            <RouteMapPreview route={route} />
+            <p className="map-caption">{route.origin.city} <span>→</span> {route.destination.city}</p>
           </Card>
           <div className="itinerary-preview" aria-label="Illustrative itinerary preview">
             <div className="itinerary-line" aria-hidden="true" />
             <Card className="itinerary-stop" label="Origin">
               <span className="stop-dot" aria-hidden="true" />
               <span className="stop-caption">Origin</span>
-              <strong>São Paulo</strong>
+              <strong>{route.origin.city}</strong>
             </Card>
             <div className="itinerary-leg"><span aria-hidden="true">↗</span> Simulated route</div>
             <Card className="itinerary-stop" label="Destination">
               <span className="stop-dot" aria-hidden="true" />
               <span className="stop-caption">Destination</span>
-              <strong>New York</strong>
+              <strong>{route.destination.city}</strong>
             </Card>
           </div>
         </Surface>
@@ -60,7 +63,7 @@ export default function App() {
             <Badge tone="muted">Preview</Badge>
           </div>
           <Card className="route-display" label="Route display">
-            <RouteMapPreview caption="Route display" regional />
+            <RouteMapPreview route={route} caption="Route display" regional />
           </Card>
           <Card className="metric-display" label="Planning information placeholder">
             <span>Flight options</span><Badge tone="muted">Pending</Badge>

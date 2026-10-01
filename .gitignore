@@ -4,7 +4,7 @@ dist/
 .claude/
 .codex/
 .playwright-mcp/
-assets
+/assets
 
 # Local Impeccable workbench output; durable surface and design records are versioned.
 .impeccable/build/
@@ -16,3 +16,8 @@ assets
 .impeccable/*-composition.json
 .impeccable/*-direction.json
 .impeccable/orbital-*-comp.json
+
+# Unused visual exploration output (the shipped assets are referenced from src/).
+public/assets/atlas-earth.png
+public/assets/earth-horizon.png
+public/assets/plates/right-route-map.png

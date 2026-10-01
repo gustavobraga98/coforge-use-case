@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Badge, Button, Card, Surface } from './components/ui'
 import { RouteMapPreview } from './components/RouteMapPreview'
+import { TripContextSummary } from './components/TripContextSummary'
 import { atlasTravelScenario } from './data/tripScenario'
 import './styles/app.css'
 
@@ -58,24 +59,7 @@ export default function App() {
         </Surface>
 
         <Surface as="aside" className="planning-rail planning-rail--right" label="Planning panels">
-          <div className="rail-heading">
-            <h2>Planning panels</h2>
-            <Badge tone="muted">Preview</Badge>
-          </div>
-          <Card className="route-display" label="Route display">
-            <RouteMapPreview route={route} caption="Route display" regional />
-          </Card>
-          <Card className="metric-display" label="Planning information placeholder">
-            <span>Flight options</span><Badge tone="muted">Pending</Badge>
-          </Card>
-          <Card className="metric-display" label="Budget information placeholder">
-            <span>Budget overview</span><Badge tone="muted">Pending</Badge>
-          </Card>
-          <Card className="metric-display" label="Policy information placeholder">
-            <span>Policy status</span><Badge tone="muted">Pending</Badge>
-          </Card>
-          <Card className="horizon-card" label="Earth horizon image" />
-          <p className="rail-note">Trip details will populate these panels in the next stage.</p>
+          <TripContextSummary scenario={atlasTravelScenario} />
         </Surface>
       </div>
     </main>

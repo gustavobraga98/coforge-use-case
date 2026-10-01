@@ -39,11 +39,23 @@
 .stop-dot { position: absolute; left: 15px; top: 22px; width: 10px; height: 10px; border: 2px solid #f4c66d; border-radius: 50%; background: #091a29; box-shadow: 0 0 9px #efbb5780; }
 .stop-caption { color: #9fb6c2; font-size: 11px; }.itinerary-stop strong { color: #eef5f5; font-size: 15px; font-weight: 600; }
 .itinerary-leg { z-index: 1; align-self: center; padding: 6px 10px; border-radius: 6px; background: #0b2132; color: #79d4e1; font-size: 11px; }.itinerary-leg span { margin-right: 5px; }
-.route-display { overflow: hidden; }
-.route-display .route-map-preview { height: 188px; }
-.metric-display { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 59px; padding: 13px 12px; color: #d4e4e9; font-size: 12px; }
-.horizon-card { min-height: 96px; background: #071522 url('/assets/plates/right-horizon.png') center 56% / cover no-repeat; }
-.rail-note { margin: 2px 3px; color: #9cb3bf; font-size: 11px; line-height: 1.5; }
+.trip-context { display: flex; flex-direction: column; gap: 14px; }
+.trip-context__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 6px 4px 3px; }
+.trip-context__heading h2 { margin: 0; font: 600 18px/1.2 'Space Grotesk', sans-serif; letter-spacing: -.02em; }
+.trip-context__heading p { margin: 5px 0 0; color: #9fb6c2; font-size: 11px; line-height: 1.4; }
+.trip-context__status { display: flex; align-items: center; gap: 11px; padding: 12px; }
+.trip-context__status > div { display: flex; flex-direction: column; gap: 2px; }
+.trip-context__status span:not(.trip-status) { color: #9fb6c2; font-size: 10px; }
+.trip-context__status strong { color: #eaf4f5; font-size: 13px; font-weight: 600; }
+.trip-status { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: #7e9bab; }
+.trip-status--planning { background: #47dbe9; box-shadow: 0 0 9px #47dbe980; }
+.trip-status--readyToBook { background: #f4c66d; box-shadow: 0 0 9px #f4c66d80; }
+.trip-context__details { display: flex; flex-direction: column; gap: 0; margin: 0; border-top: 1px solid #1b3447; }
+.trip-context__details > div { display: grid; grid-template-columns: minmax(83px, .7fr) minmax(0, 1.3fr); gap: 10px; padding: 12px 3px; border-bottom: 1px solid #1b3447; }
+.trip-context__details dt { color: #9fb6c2; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.trip-context__details dd { min-width: 0; margin: 0; color: #e2eef1; font-size: 12px; line-height: 1.45; text-align: right; }
+.trip-context__route dd { color: #67ddea; font-weight: 600; }
+.trip-context__route dd span { margin: 0 3px; color: #f4c66d; }
 .globe-workspace { position: absolute; z-index: 1; top: 0; left: 50%; transform: translateX(-50%); width: min(100vw, 1150px); height: calc(100vh - 72px); min-height: 720px; display: grid; place-items: center; }
 .globe-workspace canvas { display: block; filter: brightness(1.14) saturate(1.08); }
 .globe-instruction { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); margin: 0; padding: 5px 9px; border-radius: 6px; background: #06121ecb; color: #bbd1da; font-size: 11px; white-space: nowrap; pointer-events: none; }

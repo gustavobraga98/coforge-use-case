@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-30T23:20:00-03:00",
+  "title": "Design System: Atlas Travel",
+  "extensions": {
+    "colorMeta": {
+      "night": { "role": "neutral", "displayName": "Orbital Night", "canonical": "#050b14", "tonalRamp": ["#050b14", "#071522", "#091a29", "#0b2132", "#1b3447", "#45667a", "#9fb6c2", "#e8f2f5"] },
+      "cyan": { "role": "primary", "displayName": "Route Cyan", "canonical": "#47dbe9", "tonalRamp": ["#06191c", "#0d343a", "#15535d", "#21717d", "#2f9dac", "#47dbe9", "#92edf3", "#e4fcfd"] },
+      "amber": { "role": "secondary", "displayName": "Waypoint Amber", "canonical": "#f4c66d", "tonalRamp": ["#211808", "#493510", "#735619", "#9f7825", "#cda145", "#f4c66d", "#f9dfaa", "#fff6df"] }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "Operational Title", "purpose": "Brand and concise panel headings." },
+      "body": { "displayName": "Operational Body", "purpose": "Controls, place names, and supporting description." },
+      "label": { "displayName": "Technical Label", "purpose": "Compact metadata and status markers." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "globe-camera", "value": "450ms", "purpose": "Smooth camera changes initiated by globe controls." }
+    ],
+    "breakpoints": [
+      { "name": "rail-stack", "value": "850px" },
+      { "name": "mobile", "value": "650px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The affirmative cyan action style.",
+      "html": "<button class=\"ds-btn-primary\">Continue</button>",
+      "css": ".ds-btn-primary { border: 1px solid #47dbe9; border-radius: 9px; padding: 10px 14px; background: #47dbe9; color: #03121a; font: 700 13px 'Space Grotesk', sans-serif; cursor: pointer; } .ds-btn-primary:hover { background: #61dce9; } .ds-btn-primary:focus-visible { outline: 3px solid #2457d6; outline-offset: 3px; }"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "A compact supporting action for the dark workspace.",
+      "html": "<button class=\"ds-btn-quiet\">Center</button>",
+      "css": ".ds-btn-quiet { border: 1px solid #294559; border-radius: 9px; padding: 10px 14px; background: #0b1a29; color: #dfebef; font: 700 13px 'Space Grotesk', sans-serif; cursor: pointer; } .ds-btn-quiet:hover { background: #12344a; } .ds-btn-quiet:focus-visible { outline: 3px solid #2457d6; outline-offset: 3px; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Container-free technical metadata.",
+      "html": "<span class=\"ds-badge\">Illustrative</span>",
+      "css": ".ds-badge { color: #61dce9; font: 700 10px 'Space Grotesk', sans-serif; letter-spacing: .09em; text-transform: uppercase; }"
+    },
+    {
+      "name": "Planning Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "A quiet information surface inside an orbital rail.",
+      "html": "<div class=\"ds-card\">Planning information</div>",
+      "css": ".ds-card { min-width: 0; border: 1px solid #1b3447; border-radius: 9px; padding: 13px 12px; background: #091a29; color: #e8f2f5; font: 400 13px 'Space Grotesk', sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Orbital Operations Deck",
+    "overview": "Atlas Travel frames travel planning as a calm, high-confidence operations surface. Near-black space, local satellite geography, and restrained cyan trajectory lines make the physical route tangible without presenting a real booking system. The visual drama belongs to the interactive Earth. Surrounding information remains compact, factual, and visibly provisional so later traditional and AI-assisted flows can occupy the same shell.",
+    "keyCharacteristics": ["A real-geography 3D globe is the primary workspace object.", "Cyan signals active spatial context; amber marks route endpoints.", "Dense but quiet panels support, rather than compete with, the globe."],
+    "rules": [
+      { "name": "The Sparse Signal Rule", "body": "Cyan is an operational signal, not a decorative fill; reserve it for the route, interactive controls, and essential status.", "section": "colors" },
+      { "name": "The Globe-First Rule", "body": "Never place a dense data view where it obscures the globe’s route or its direct manipulation controls.", "section": "layout" }
+    ],
+    "dos": ["Do keep geographic rendering real while explicitly labeling routes and planning content as illustrative.", "Do reserve the right rail for evolving planning or assistant content without displacing the globe.", "Do use cyan and amber with intention, preserving contrast on dark surfaces."],
+    "donts": ["Don't imply bookings, suppliers, map traffic, or travel data are real.", "Don't turn supporting panels into bright competing focal points.", "Don't make the assistant state appear active before T5 implements its behavior."]
+  }
+}

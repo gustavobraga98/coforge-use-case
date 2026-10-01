@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.vite/
+.claude/
+.codex/
+.playwright-mcp/
+assets
+
+# Local Impeccable workbench output; durable surface and design records are versioned.
+.impeccable/build/
+.impeccable/config.local.json
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/review/
+.impeccable/surfaces/
+.impeccable/*-composition.json
+.impeccable/*-direction.json
+.impeccable/orbital-*-comp.json

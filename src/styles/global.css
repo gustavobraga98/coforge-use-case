@@ -1,0 +1,36 @@
+@import '@fontsource/space-grotesk/400.css';
+@import '@fontsource/space-grotesk/600.css';
+
+:root {
+  color: #e8f1f4;
+  background: #050b13;
+  font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: #2fd8e9; color: #031018; }
+
+body { scrollbar-color: #285064 #07121d; }
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid #2457d6;
+  outline-offset: 3px;
+}

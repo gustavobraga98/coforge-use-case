@@ -42,6 +42,7 @@ export default function App() {
     createInitialTraditionalFlightFilters(),
   )
   const [traditionalResultsTab, setTraditionalResultsTab] = useState<TraditionalResultsTab>('flights')
+  const [selectedFlightId, setSelectedFlightId] = useState<string | null>(null)
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const route = atlasTravelScenario.request.route
   const isTraditionalSearchActive = traditionalSearchState !== 'form'
@@ -53,6 +54,7 @@ export default function App() {
   }, [])
 
   function searchTraditionalOptions() {
+    setSelectedFlightId(null)
     setTraditionalSearchState('searching')
     searchTimeout.current = setTimeout(() => {
       setTraditionalSearchState('results')
@@ -127,8 +129,10 @@ export default function App() {
               criteria={traditionalSearchCriteria}
               filters={traditionalFlightFilters}
               activeTab={traditionalResultsTab}
+              selectedFlightId={selectedFlightId}
               onFiltersChange={setTraditionalFlightFilters}
               onActiveTabChange={setTraditionalResultsTab}
+              onFlightSelect={setSelectedFlightId}
               onModifySearch={() => setTraditionalSearchState('form')}
             />
           ) : (

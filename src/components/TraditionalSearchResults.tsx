@@ -1,9 +1,9 @@
 import type { KeyboardEvent } from 'react'
-import type { TripScenario } from '../data/tripScenario'
+import type { FlightLeg, FlightOption, TripScenario } from '../data/tripScenario'
 import type { TraditionalSearchCriteria } from './TraditionalSearchForm'
 import {
   createInitialTraditionalFlightFilters,
-  filterTraditionalFlightOptions,
+  evaluateTraditionalFlightOptions,
   type TraditionalFlightFilters,
 } from './traditionalFlightFilters'
 import { Badge, Button } from './ui'
@@ -15,8 +15,10 @@ type TraditionalSearchResultsProps = {
   criteria: TraditionalSearchCriteria
   filters: TraditionalFlightFilters
   activeTab: TraditionalResultsTab
+  selectedFlightId: string | null
   onFiltersChange: (filters: TraditionalFlightFilters) => void
   onActiveTabChange: (tab: TraditionalResultsTab) => void
+  onFlightSelect: (flightId: string) => void
   onModifySearch: () => void
 }
 
@@ -28,12 +30,31 @@ const priceOptions = [
   { value: '2000', label: 'Up to $2,000' },
 ] as const
 
-function formatArrivalTime(dateTime: string): string {
+function formatTime(dateTime: string): string {
   const [hour, minute] = dateTime.slice(11, 16).split(':').map(Number)
   const period = hour >= 12 ? 'PM' : 'AM'
   const displayHour = hour % 12 || 12
 
   return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`
+}
+
+function formatDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+
+  return remainingMinutes === 0 ? `${hours}h` : `${hours}h ${remainingMinutes}m`
+}
+
+function formatStops(stops: number): string {
+  return stops === 0 ? 'Direct' : `${stops} stop${stops === 1 ? '' : 's'}`
+}
+
+function formatCabin(cabin: FlightOption['cabin']): string {
+  return cabin === 'premiumEconomy' ? 'Premium economy' : 'Economy'
+}
+
+function formatLeg(leg: FlightLeg): string {
+  return `${formatTime(leg.departsAt)} → ${formatTime(leg.arrivesAt)}`
 }
 
 function formatPrice(price: number): string {
@@ -53,12 +74,21 @@ export function TraditionalSearchResults({
   criteria,
   filters,
   activeTab,
+  selectedFlightId,
   onFiltersChange,
   onActiveTabChange,
+  onFlightSelect,
   onModifySearch,
 }: TraditionalSearchResultsProps) {
-  const matchingFlights = filterTraditionalFlightOptions(scenario, filters)
-  const arrivalLabel = formatArrivalTime(scenario.request.arriveBefore)
+  const evaluatedFlights = evaluateTraditionalFlightOptions(scenario, filters)
+  const eligibleFlightCount = evaluatedFlights.filter(({ isEligible }) => isEligible).length
+  const selectedFlight = selectedFlightId === null
+    ? null
+    : scenario.flightOptions.find(({ id }) => id === selectedFlightId) ?? null
+  const arrivalLabel = formatTime(scenario.request.arriveBefore)
+  const tradeOffsByFlightId = new Map(
+    scenario.alternatives.map((alternative) => [alternative.flightOptionId, alternative.label]),
+  )
 
   function updateFilter<Key extends keyof TraditionalFlightFilters>(key: Key, value: TraditionalFlightFilters[Key]) {
     onFiltersChange({ ...filters, [key]: value })
@@ -164,27 +194,76 @@ export function TraditionalSearchResults({
             <p>
               {filters.directOnly ? 'Direct flights' : 'Connections allowed'} · {filters.arrivalBeforeRequestedTime ? `arrive before ${arrivalLabel}` : 'any arrival time'} · {filters.maxPriceUsd === null ? 'any price' : `up to ${formatPrice(filters.maxPriceUsd)}`}
             </p>
+            <p className="traditional-results__eligibility">{eligibleFlightCount} of {evaluatedFlights.length} simulated flights available to select.</p>
           </div>
 
-          {matchingFlights.length > 0 ? (
-            <ul className="traditional-flight-list" aria-label={`${matchingFlights.length} matching simulated flights`}>
-              {matchingFlights.map((flight) => (
-                <li key={flight.id} className="traditional-flight-list__item">
-                  <div>
-                    <strong>{flight.label}</strong>
-                    <span>{flight.outbound.stops === 0 ? 'Direct' : `${flight.outbound.stops} stop${flight.outbound.stops === 1 ? '' : 's'}`}</span>
-                  </div>
-                  <dl>
-                    <div><dt>Arrives</dt><dd>{formatArrivalTime(flight.outbound.arrivesAt)}</dd></div>
-                    <div><dt>Round trip</dt><dd>{formatPrice(flight.roundTripPriceUsd)}</dd></div>
-                  </dl>
+          {selectedFlight && (
+            <section className="selected-flight" aria-labelledby="selected-flight-heading">
+              <div>
+                <span>Selected flight</span>
+                <h3 id="selected-flight-heading">{selectedFlight.label}</h3>
+              </div>
+              <dl>
+                <div><dt>Round trip</dt><dd>{formatPrice(selectedFlight.roundTripPriceUsd)}</dd></div>
+                <div><dt>Outbound</dt><dd>{formatLeg(selectedFlight.outbound)}</dd></div>
+              </dl>
+              <p>Choose another available option below to change this selection.</p>
+            </section>
+          )}
+
+          <ul className="traditional-flight-list" aria-label={`${evaluatedFlights.length} simulated flight options`}>
+            {evaluatedFlights.map(({ flight, isEligible, reasons }) => {
+              const isSelected = selectedFlightId === flight.id
+              const reasonId = `flight-${flight.id}-reasons`
+
+              return (
+                <li key={flight.id}>
+                  <article
+                    className={`traditional-flight-card${isSelected ? ' traditional-flight-card--selected' : ''}${!isEligible ? ' traditional-flight-card--unavailable' : ''}`}
+                    aria-label={`${flight.label}${isSelected ? ', selected' : ''}`}
+                  >
+                    <div className="traditional-flight-card__heading">
+                      <div>
+                        <span className="traditional-flight-card__tradeoff">{tradeOffsByFlightId.get(flight.id) ?? 'Flight option'}</span>
+                        <h3>{flight.label}</h3>
+                      </div>
+                      <strong>{formatPrice(flight.roundTripPriceUsd)}</strong>
+                    </div>
+                    <dl className="traditional-flight-card__details">
+                      <div><dt>Cabin</dt><dd>{formatCabin(flight.cabin)}</dd></div>
+                      <div><dt>Outbound</dt><dd>{formatLeg(flight.outbound)}</dd></div>
+                      <div><dt>Return</dt><dd>{formatLeg(flight.return)}</dd></div>
+                      <div><dt>Duration</dt><dd>{formatDuration(flight.outbound.durationMinutes)} out · {formatDuration(flight.return.durationMinutes)} back</dd></div>
+                      <div><dt>Stops</dt><dd>{formatStops(flight.outbound.stops)} out · {formatStops(flight.return.stops)} back</dd></div>
+                    </dl>
+                    {reasons.length > 0 && (
+                      <div id={reasonId} className="traditional-flight-card__reasons">
+                        <strong>Unavailable with these filters</strong>
+                        <ul>{reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>
+                      </div>
+                    )}
+                    {isEligible ? (
+                      <Button
+                        type="button"
+                        tone={isSelected ? 'quiet' : 'primary'}
+                        aria-pressed={isSelected}
+                        onClick={() => onFlightSelect(flight.id)}
+                      >
+                        {isSelected ? 'Selected flight' : `Select ${flight.label}`}
+                      </Button>
+                    ) : isSelected ? (
+                      <p className="traditional-flight-card__selected-notice">This selected flight no longer meets the active filters.</p>
+                    ) : null}
+                  </article>
                 </li>
-              ))}
-            </ul>
-          ) : (
+              )
+            })}
+          </ul>
+
+          {eligibleFlightCount === 0 && (
             <div className="traditional-results__empty" role="status">
-              <h3>No simulated flights match these filters.</h3>
-              <p>Adjust the filters or reset them to review the available options.</p>
+              <h3>No simulated flights are available to select.</h3>
+              <p>Every option remains visible above. Adjust the filters or reset them to make an option available.</p>
             </div>
           )}
 

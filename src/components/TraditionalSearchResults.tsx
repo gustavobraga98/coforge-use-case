@@ -19,11 +19,13 @@ type TraditionalSearchResultsProps = {
   activeTab: TraditionalResultsTab
   selectedFlightId: string | null
   selectedHotelId: string | null
+  hasMatchingScenario: boolean
   onFiltersChange: (filters: TraditionalFlightFilters) => void
   onActiveTabChange: (tab: TraditionalResultsTab) => void
   onFlightSelect: (flightId: string) => void
   onHotelSelect: (hotelId: string) => void
   onModifySearch: () => void
+  onResetSearch: () => void
   onReviewPlan: () => void
 }
 
@@ -89,11 +91,13 @@ export function TraditionalSearchResults({
   activeTab,
   selectedFlightId,
   selectedHotelId,
+  hasMatchingScenario,
   onFiltersChange,
   onActiveTabChange,
   onFlightSelect,
   onHotelSelect,
   onModifySearch,
+  onResetSearch,
   onReviewPlan,
 }: TraditionalSearchResultsProps) {
   const evaluatedFlights = evaluateTraditionalFlightOptions(scenario, filters)
@@ -144,13 +148,22 @@ export function TraditionalSearchResults({
           <h2 id="traditional-results-heading">Travel options</h2>
           <p>Locally filtered simulated options for {criteria.origin} to {criteria.destination}.</p>
         </div>
-        <Badge>Search complete</Badge>
+        <Badge tone={hasMatchingScenario ? 'accent' : 'muted'}>{hasMatchingScenario ? 'Search complete' : 'No simulated matches'}</Badge>
       </div>
 
       <dl className="traditional-results__criteria">
         <div><dt>Traveler</dt><dd>{criteria.traveler}</dd></div>
         <div><dt>Dates</dt><dd>{formatDateRange(criteria)}</dd></div>
       </dl>
+
+      {!hasMatchingScenario ? (
+        <section className="traditional-results__empty traditional-results__empty--scenario" aria-labelledby="traditional-results-empty-heading" role="status">
+          <h3 id="traditional-results-empty-heading">No simulated options match these trip details.</h3>
+          <p>Atlas Travel only includes fictional options for Gustavo’s São Paulo to New York trip, November 12–16, 2026. Restore that scenario to continue.</p>
+          <Button type="button" onClick={onResetSearch}>Restore fictional trip</Button>
+        </section>
+      ) : (
+        <>
 
       <TraditionalPlanCostSummary
         scenario={scenario}
@@ -382,6 +395,8 @@ export function TraditionalSearchResults({
       )}
 
       <Button type="button" tone="quiet" onClick={onModifySearch}>Modify search</Button>
+        </>
+      )}
     </section>
   )
 }

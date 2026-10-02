@@ -11,8 +11,10 @@ import {
 import { TraditionalPlanConfirmation } from './components/TraditionalPlanConfirmation'
 import {
   createInitialTraditionalFlightFilters,
+  evaluateTraditionalFlightOptions,
   type TraditionalFlightFilters,
 } from './components/traditionalFlightFilters'
+import { createTraditionalPlanSummary } from './components/traditionalPlanSummary'
 import { Badge, Button, Card, Surface } from './components/ui'
 import { RouteMapPreview } from './components/RouteMapPreview'
 import { TripContextSummary } from './components/TripContextSummary'
@@ -31,6 +33,19 @@ function createInitialTraditionalSearchCriteria(): TraditionalSearchCriteria {
     departureDate: atlasTravelScenario.request.departureDate,
     returnDate: atlasTravelScenario.request.returnDate,
   }
+}
+
+function matchesCanonicalTraditionalSearch(
+  criteria: TraditionalSearchCriteria,
+): boolean {
+  const request = atlasTravelScenario.request
+  const normalizePlace = (value: string) => value.trim().toLocaleLowerCase()
+
+  return criteria.traveler === atlasTravelScenario.traveler.firstName
+    && normalizePlace(criteria.origin) === normalizePlace(request.route.origin.city)
+    && normalizePlace(criteria.destination) === normalizePlace(request.route.destination.city)
+    && criteria.departureDate === request.departureDate
+    && criteria.returnDate === request.returnDate
 }
 
 export default function App() {
@@ -65,6 +80,46 @@ export default function App() {
       setTraditionalSearchState('results')
       searchTimeout.current = null
     }, 500)
+  }
+
+  function updateTraditionalFlightFilters(filters: TraditionalFlightFilters) {
+    setTraditionalFlightFilters(filters)
+    setSelectedFlightId((flightId) => {
+      if (flightId === null) {
+        return null
+      }
+
+      const selectedFlight = evaluateTraditionalFlightOptions(atlasTravelScenario, filters)
+        .find(({ flight }) => flight.id === flightId)
+
+      return selectedFlight?.isEligible ? flightId : null
+    })
+  }
+
+  function reviewTraditionalPlan() {
+    const summary = createTraditionalPlanSummary(atlasTravelScenario, selectedFlightId, selectedHotelId)
+
+    if (summary.state === 'withinPolicy') {
+      setTraditionalConfirmationState('review')
+    }
+  }
+
+  function confirmTraditionalPlan() {
+    const summary = createTraditionalPlanSummary(atlasTravelScenario, selectedFlightId, selectedHotelId)
+
+    if (summary.state === 'withinPolicy') {
+      setTraditionalConfirmationState('confirmed')
+    }
+  }
+
+  function restoreCanonicalTraditionalSearch() {
+    setTraditionalSearchCriteria(createInitialTraditionalSearchCriteria())
+    setTraditionalFlightFilters(createInitialTraditionalFlightFilters())
+    setTraditionalResultsTab('flights')
+    setSelectedFlightId(null)
+    setSelectedHotelId(null)
+    setTraditionalConfirmationState('results')
+    setTraditionalSearchState('form')
   }
 
   function startAnotherTraditionalPlan() {
@@ -150,7 +205,7 @@ export default function App() {
               selectedHotelId={selectedHotelId}
               state="review"
               onBackToOptions={() => setTraditionalConfirmationState('results')}
-              onConfirm={() => setTraditionalConfirmationState('confirmed')}
+              onConfirm={confirmTraditionalPlan}
               onStartAnotherPlan={startAnotherTraditionalPlan}
             />
           ) : traditionalConfirmationState === 'confirmed' ? (
@@ -171,12 +226,14 @@ export default function App() {
               activeTab={traditionalResultsTab}
               selectedFlightId={selectedFlightId}
               selectedHotelId={selectedHotelId}
-              onFiltersChange={setTraditionalFlightFilters}
+              hasMatchingScenario={matchesCanonicalTraditionalSearch(traditionalSearchCriteria)}
+              onFiltersChange={updateTraditionalFlightFilters}
               onActiveTabChange={setTraditionalResultsTab}
               onFlightSelect={setSelectedFlightId}
               onHotelSelect={setSelectedHotelId}
               onModifySearch={() => setTraditionalSearchState('form')}
-              onReviewPlan={() => setTraditionalConfirmationState('review')}
+              onResetSearch={restoreCanonicalTraditionalSearch}
+              onReviewPlan={reviewTraditionalPlan}
             />
           ) : (
             <TraditionalSearchForm

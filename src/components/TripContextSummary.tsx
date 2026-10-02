@@ -1,7 +1,7 @@
 import type { TripScenario } from '../data/tripScenario'
 import { Badge, Card } from './ui'
 
-export type TripContextStatus = TripScenario['initialTripState']['status']
+export type TripContextStatus = TripScenario['initialTripState']['status'] | 'confirmed'
 
 type TripContextSummaryProps = {
   scenario: TripScenario
@@ -12,6 +12,7 @@ const statusLabels: Record<TripContextStatus, string> = {
   pending: 'Pending',
   planning: 'Planning',
   readyToBook: 'Ready to book',
+  confirmed: 'Confirmed (simulated)',
 }
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {

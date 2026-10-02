@@ -8,6 +8,7 @@ import {
   TraditionalSearchResults,
   type TraditionalResultsTab,
 } from './components/TraditionalSearchResults'
+import { TraditionalPlanConfirmation } from './components/TraditionalPlanConfirmation'
 import {
   createInitialTraditionalFlightFilters,
   type TraditionalFlightFilters,
@@ -44,6 +45,7 @@ export default function App() {
   const [traditionalResultsTab, setTraditionalResultsTab] = useState<TraditionalResultsTab>('flights')
   const [selectedFlightId, setSelectedFlightId] = useState<string | null>(null)
   const [selectedHotelId, setSelectedHotelId] = useState<string | null>(null)
+  const [traditionalConfirmationState, setTraditionalConfirmationState] = useState<'results' | 'review' | 'confirmed'>('results')
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const route = atlasTravelScenario.request.route
   const isTraditionalSearchActive = traditionalSearchState !== 'form'
@@ -57,11 +59,19 @@ export default function App() {
   function searchTraditionalOptions() {
     setSelectedFlightId(null)
     setSelectedHotelId(null)
+    setTraditionalConfirmationState('results')
     setTraditionalSearchState('searching')
     searchTimeout.current = setTimeout(() => {
       setTraditionalSearchState('results')
       searchTimeout.current = null
     }, 500)
+  }
+
+  function startAnotherTraditionalPlan() {
+    setSelectedFlightId(null)
+    setSelectedHotelId(null)
+    setTraditionalConfirmationState('results')
+    setTraditionalSearchState('form')
   }
 
   return (
@@ -121,10 +131,38 @@ export default function App() {
         <Surface as="aside" className="planning-rail planning-rail--right" label="Planning panels">
           <TripContextSummary
             scenario={atlasTravelScenario}
-            status={assistantEnabled || isTraditionalSearchActive ? 'planning' : atlasTravelScenario.initialTripState.status}
+            status={assistantEnabled
+              ? 'planning'
+              : traditionalConfirmationState === 'confirmed'
+                ? 'confirmed'
+                : traditionalConfirmationState === 'review'
+                  ? 'readyToBook'
+                  : isTraditionalSearchActive
+                    ? 'planning'
+                    : atlasTravelScenario.initialTripState.status}
           />
           {assistantEnabled ? (
             <AssistantPanel scenario={atlasTravelScenario} />
+          ) : traditionalConfirmationState === 'review' ? (
+            <TraditionalPlanConfirmation
+              scenario={atlasTravelScenario}
+              selectedFlightId={selectedFlightId}
+              selectedHotelId={selectedHotelId}
+              state="review"
+              onBackToOptions={() => setTraditionalConfirmationState('results')}
+              onConfirm={() => setTraditionalConfirmationState('confirmed')}
+              onStartAnotherPlan={startAnotherTraditionalPlan}
+            />
+          ) : traditionalConfirmationState === 'confirmed' ? (
+            <TraditionalPlanConfirmation
+              scenario={atlasTravelScenario}
+              selectedFlightId={selectedFlightId}
+              selectedHotelId={selectedHotelId}
+              state="confirmed"
+              onBackToOptions={() => setTraditionalConfirmationState('results')}
+              onConfirm={() => setTraditionalConfirmationState('confirmed')}
+              onStartAnotherPlan={startAnotherTraditionalPlan}
+            />
           ) : traditionalSearchState === 'results' ? (
             <TraditionalSearchResults
               scenario={atlasTravelScenario}
@@ -138,6 +176,7 @@ export default function App() {
               onFlightSelect={setSelectedFlightId}
               onHotelSelect={setSelectedHotelId}
               onModifySearch={() => setTraditionalSearchState('form')}
+              onReviewPlan={() => setTraditionalConfirmationState('review')}
             />
           ) : (
             <TraditionalSearchForm

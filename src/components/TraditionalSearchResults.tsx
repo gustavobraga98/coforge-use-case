@@ -7,6 +7,7 @@ import {
   type TraditionalFlightFilters,
 } from './traditionalFlightFilters'
 import { TraditionalPlanCostSummary } from './TraditionalPlanCostSummary'
+import { createTraditionalPlanSummary } from './traditionalPlanSummary'
 import { Badge, Button } from './ui'
 
 export type TraditionalResultsTab = 'flights' | 'stays'
@@ -23,6 +24,7 @@ type TraditionalSearchResultsProps = {
   onFlightSelect: (flightId: string) => void
   onHotelSelect: (hotelId: string) => void
   onModifySearch: () => void
+  onReviewPlan: () => void
 }
 
 const tabs: readonly TraditionalResultsTab[] = ['flights', 'stays']
@@ -92,6 +94,7 @@ export function TraditionalSearchResults({
   onFlightSelect,
   onHotelSelect,
   onModifySearch,
+  onReviewPlan,
 }: TraditionalSearchResultsProps) {
   const evaluatedFlights = evaluateTraditionalFlightOptions(scenario, filters)
   const eligibleFlightCount = evaluatedFlights.filter(({ isEligible }) => isEligible).length
@@ -108,6 +111,7 @@ export function TraditionalSearchResults({
   const lowestNightlyRate = Math.min(...scenario.hotelOptions.map(({ nightlyRateUsd }) => nightlyRateUsd))
   const comfortOrder: Record<HotelOption['comfort'], number> = { essential: 0, standard: 1, enhanced: 2 }
   const highestComfort = Math.max(...scenario.hotelOptions.map(({ comfort }) => comfortOrder[comfort]))
+  const planSummary = createTraditionalPlanSummary(scenario, selectedFlightId, selectedHotelId)
 
   function updateFilter<Key extends keyof TraditionalFlightFilters>(key: Key, value: TraditionalFlightFilters[Key]) {
     onFiltersChange({ ...filters, [key]: value })
@@ -153,6 +157,16 @@ export function TraditionalSearchResults({
         selectedFlightId={selectedFlightId}
         selectedHotelId={selectedHotelId}
       />
+
+      {planSummary.state === 'withinPolicy' && (
+        <section className="traditional-results__review-action" aria-labelledby="traditional-results-review-heading">
+          <div>
+            <h3 id="traditional-results-review-heading">Ready for review</h3>
+            <p>Review the selected simulated plan before confirming it.</p>
+          </div>
+          <Button type="button" onClick={onReviewPlan}>Review simulated plan</Button>
+        </section>
+      )}
 
       <div className="traditional-results__tabs" role="tablist" aria-label="Travel result types">
         {tabs.map((tab) => {

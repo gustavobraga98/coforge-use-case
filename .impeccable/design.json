@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-30T23:20:00-03:00",
+  "generatedAt": "2026-10-02T11:01:36-03:00",
   "title": "Design System: Atlas Travel",
   "extensions": {
     "colorMeta": {
@@ -15,7 +15,8 @@
     },
     "shadows": [],
     "motion": [
-      { "name": "globe-camera", "value": "450ms", "purpose": "Smooth camera changes initiated by globe controls." }
+      { "name": "globe-camera", "value": "450ms", "purpose": "Smooth camera changes initiated by globe controls." },
+      { "name": "assistant-panel-enter", "value": "260ms ease-out", "purpose": "A restrained entrance for the assisted planning narrative, disabled when reduced motion is preferred." }
     ],
     "breakpoints": [
       { "name": "rail-stack", "value": "850px" },
@@ -54,6 +55,14 @@
       "description": "A quiet information surface inside an orbital rail.",
       "html": "<div class=\"ds-card\">Planning information</div>",
       "css": ".ds-card { min-width: 0; border: 1px solid #1b3447; border-radius: 9px; padding: 13px 12px; background: #091a29; color: #e8f2f5; font: 400 13px 'Space Grotesk', sans-serif; }"
+    },
+    {
+      "name": "Assistant Conversation",
+      "kind": "custom",
+      "refersTo": "assistant-panel",
+      "description": "A compact, informational conversation state for organizing a fictional travel request.",
+      "html": "<section class=\"ds-assistant\"><span class=\"ds-author\">GUSTAVO</span><p>Plan a trip from São Paulo to New York.</p><div class=\"ds-status\"><i></i> Organizing your plan</div></section>",
+      "css": ".ds-assistant { padding: 12px; border: 1px solid #2c6175; border-radius: 9px; background: #0b2332; color: #e3f0f3; font: 400 12px/1.55 'Space Grotesk', sans-serif; } .ds-assistant p { margin: 6px 0 12px; } .ds-author { color: #6de5ed; font-size: 10px; font-weight: 700; letter-spacing: .08em; } .ds-status { display: flex; align-items: center; gap: 8px; color: #78e1e9; font-weight: 600; } .ds-status i { width: 7px; height: 7px; border-radius: 50%; background: #47dbe9; }"
     }
   ],
   "narrative": {

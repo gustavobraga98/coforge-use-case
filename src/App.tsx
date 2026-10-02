@@ -69,8 +69,11 @@ export default function App() {
         </Surface>
 
         <Surface as="aside" className="planning-rail planning-rail--right" label="Planning panels">
-          <TripContextSummary scenario={atlasTravelScenario} />
-          {assistantEnabled && <AssistantPanel travelerName={atlasTravelScenario.traveler.firstName} />}
+          <TripContextSummary
+            scenario={atlasTravelScenario}
+            status={assistantEnabled ? 'planning' : atlasTravelScenario.initialTripState.status}
+          />
+          {assistantEnabled && <AssistantPanel scenario={atlasTravelScenario} />}
         </Surface>
       </div>
     </main>

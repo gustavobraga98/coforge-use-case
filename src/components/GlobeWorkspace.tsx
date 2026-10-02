@@ -10,7 +10,12 @@ function getDimensions() {
   }
 }
 
-export function GlobeWorkspace({ route }: { route: TripRoute }) {
+type GlobeWorkspaceProps = {
+  route: TripRoute
+  assistantEnabled: boolean
+}
+
+export function GlobeWorkspace({ route, assistantEnabled }: GlobeWorkspaceProps) {
   const globeRef = useRef<ComponentRef<typeof Globe> | undefined>(undefined)
   const [dimensions, setDimensions] = useState(getDimensions)
   const initialView = useMemo(() => ({
@@ -49,7 +54,7 @@ export function GlobeWorkspace({ route }: { route: TripRoute }) {
   }
 
   return (
-    <section className="globe-workspace" aria-label={`Interactive globe showing an illustrative ${route.origin.city} to ${route.destination.city} route`}>
+    <section className={`globe-workspace ${assistantEnabled ? 'globe-workspace--assisted' : ''}`} aria-label={`Interactive globe showing an illustrative ${route.origin.city} to ${route.destination.city} route`}>
       <Globe
         ref={globeRef}
         width={dimensions.width}
@@ -57,12 +62,12 @@ export function GlobeWorkspace({ route }: { route: TripRoute }) {
         globeImageUrl="/assets/earth-night.jpg"
         backgroundColor="rgba(0,0,0,0)"
         showAtmosphere
-        atmosphereColor="#48c8e4"
-        atmosphereAltitude={0.1}
+        atmosphereColor={assistantEnabled ? '#65dce9' : '#48c8e4'}
+        atmosphereAltitude={assistantEnabled ? 0.13 : 0.1}
         arcsData={arcs}
-        arcColor={() => '#57e5f1'}
-        arcAltitude={0.25}
-        arcStroke={0.7}
+        arcColor={() => assistantEnabled ? '#8af3f4' : '#57e5f1'}
+        arcAltitude={assistantEnabled ? 0.3 : 0.25}
+        arcStroke={assistantEnabled ? 0.9 : 0.7}
         arcDashLength={1}
         arcDashGap={0}
         pointsData={places}

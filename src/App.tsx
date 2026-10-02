@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
+import { AssistantPanel } from './components/AssistantPanel'
 import { Badge, Button, Card, Surface } from './components/ui'
 import { RouteMapPreview } from './components/RouteMapPreview'
 import { TripContextSummary } from './components/TripContextSummary'
@@ -10,10 +11,11 @@ const GlobeWorkspace = lazy(() =>
 )
 
 export default function App() {
+  const [assistantEnabled, setAssistantEnabled] = useState(false)
   const route = atlasTravelScenario.request.route
 
   return (
-    <main className="application-shell" id="workspace">
+    <main className={`application-shell ${assistantEnabled ? 'application-shell--assisted' : 'application-shell--traditional'}`} id="workspace">
       <header className="application-header">
         <a className="brand" href="#workspace" aria-label="Atlas Travel home">
           <span className="brand-orbit" aria-hidden="true" />
@@ -21,16 +23,24 @@ export default function App() {
         </a>
         <div className="header-actions">
           <Badge tone="muted">Demonstration</Badge>
-          <Button className="assistant-toggle" tone="quiet" type="button" disabled aria-label="AI Assistant is unavailable in this preview">
+          <Button
+            className="assistant-toggle"
+            tone="quiet"
+            type="button"
+            aria-label={`AI Assistant ${assistantEnabled ? 'on' : 'off'}`}
+            aria-pressed={assistantEnabled}
+            onClick={() => setAssistantEnabled((enabled) => !enabled)}
+          >
             <span>AI Assistant</span>
+            <span className="assistant-toggle__state" aria-hidden="true">{assistantEnabled ? 'On' : 'Off'}</span>
             <span className="switch-track" aria-hidden="true"><span /></span>
           </Button>
         </div>
       </header>
 
-      <div className="workspace">
+      <div className={`workspace ${assistantEnabled ? 'workspace--assisted' : 'workspace--traditional'}`}>
         <Suspense fallback={<div className="globe-loading" role="status">Loading interactive globe…</div>}>
-          <GlobeWorkspace route={route} />
+          <GlobeWorkspace route={route} assistantEnabled={assistantEnabled} />
         </Suspense>
 
         <Surface as="aside" className="planning-rail planning-rail--left" label="Route overview">
@@ -60,6 +70,7 @@ export default function App() {
 
         <Surface as="aside" className="planning-rail planning-rail--right" label="Planning panels">
           <TripContextSummary scenario={atlasTravelScenario} />
+          {assistantEnabled && <AssistantPanel travelerName={atlasTravelScenario.traveler.firstName} />}
         </Surface>
       </div>
     </main>

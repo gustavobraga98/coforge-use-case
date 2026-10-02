@@ -139,7 +139,7 @@ Panels use gentle rounded rectangles; cards use a slightly tighter corner. The a
 
 ### Navigation
 
-- **Style:** A restrained header with the Atlas Travel mark at left and the disabled assistant affordance at right during T2.
+- **Style:** A restrained header with the Atlas Travel mark at left and a clearly labeled assistant mode control at right.
 
 ### Interactive Globe
 

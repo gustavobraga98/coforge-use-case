@@ -82,6 +82,26 @@
 .traditional-results__criteria > div { display: grid; grid-template-columns: minmax(68px, .65fr) minmax(0, 1.35fr); gap: 9px; padding: 9px 2px; border-bottom: 1px solid #1b3447; }
 .traditional-results__criteria dt, .traditional-flight-list dt, .traditional-hotel-list dt, .selected-flight dt, .selected-hotel dt { color: #9fb6c2; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .traditional-results__criteria dd { min-width: 0; margin: 0; color: #e2eef1; font-size: 12px; line-height: 1.45; text-align: right; }
+.traditional-plan-summary { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid #31566b; border-radius: 9px; background: #081a27; }
+.traditional-plan-summary--withinPolicy { border-color: #2b7180; background: #08202d; }
+.traditional-plan-summary--requiresReview { border-color: #80633a; background: #171a1a; }
+.traditional-plan-summary__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.traditional-plan-summary__heading h3 { margin: 0; color: #eaf6f7; font-size: 13px; font-weight: 600; line-height: 1.35; }
+.traditional-plan-summary__heading p { margin: 3px 0 0; color: #a9c2cc; font-size: 11px; line-height: 1.45; }
+.traditional-plan-summary__status { flex: 0 0 auto; color: #bdcdd2; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-align: right; text-transform: uppercase; }
+.traditional-plan-summary--withinPolicy .traditional-plan-summary__status { color: #73e1ea; }
+.traditional-plan-summary--requiresReview .traditional-plan-summary__status { color: #f4c66d; }
+.traditional-plan-summary__costs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 10px 0; border-top: 1px solid #1b3447; border-bottom: 1px solid #1b3447; }
+.traditional-plan-summary__costs div { min-width: 0; }
+.traditional-plan-summary__costs dt { color: #9fb6c2; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.traditional-plan-summary__costs dd { margin: 3px 0 0; color: #e8f2f5; font-size: 11px; font-variant-numeric: tabular-nums; font-weight: 600; line-height: 1.4; }
+.traditional-plan-summary__total dd { color: #79e5ed; }
+.traditional-plan-summary--requiresReview .traditional-plan-summary__total dd { color: #f4c66d; }
+.traditional-plan-summary__detail { margin: 0; color: #c2d5da; font-size: 11px; line-height: 1.45; }
+.traditional-plan-summary__alerts { display: flex; flex-direction: column; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.traditional-plan-summary__alerts li { padding: 9px; border: 1px solid #755f3f; border-radius: 7px; background: #1b1b19; }
+.traditional-plan-summary__alerts strong { color: #f4d38e; font-size: 11px; font-weight: 600; line-height: 1.4; }
+.traditional-plan-summary__alerts p { margin: 3px 0 0; color: #d5d9c8; font-size: 11px; line-height: 1.45; }
 .traditional-results__tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid #285064; }
 .traditional-results__tab { min-height: 38px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #a9c2cc; cursor: pointer; font-size: 12px; font-weight: 600; }
 .traditional-results__tab:hover { color: #eaf6f7; background: #0a1d2b; }
@@ -143,6 +163,7 @@
 .traditional-hotel-card__details > div:nth-child(3), .traditional-hotel-card__details > div:nth-child(4) { grid-column: 1 / -1; }
 .traditional-hotel-card__details dd { margin: 2px 0 0; color: #e2eef1; font-size: 11px; line-height: 1.4; font-variant-numeric: tabular-nums; }
 .traditional-hotel-card__policy { color: #73e1ea !important; font-weight: 600; }
+.traditional-hotel-card__policy--alert { color: #f4c66d !important; }
 .traditional-hotel-card .button { width: 100%; }
 @keyframes traditional-results-enter { from { opacity: .65; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 .assistant-panel { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; padding: 16px 4px 4px; border-top: 1px solid #285064; animation: assistant-panel-enter 260ms ease-out both; }
@@ -178,5 +199,5 @@
 
 @media (max-width: 1120px) { .workspace { grid-template-columns: 220px minmax(0, 1fr) 220px; gap: 12px; padding: 20px 14px; }.planning-rail { padding: 9px; }.globe-workspace { width: 100vw; } }
 @media (max-width: 850px) { .workspace { grid-template-columns: 220px 1fr; }.planning-rail--right { grid-column: 1; grid-row: 2; }.globe-workspace { left: 54%; } }
-@media (max-width: 650px) { .application-header { height: 64px; padding: 0 16px; }.brand { gap: 8px; font-size: 20px; }.brand-orbit { width: 25px; height: 25px; }.header-actions > .badge { display: none; }.assistant-toggle { gap: 7px; padding-left: 10px; font-size: 11px; }.workspace { display: flex; flex-direction: column; gap: 14px; min-height: calc(100vh - 64px); padding: 390px 14px 20px; }.globe-workspace { top: 0; left: 50%; width: 100%; height: 400px; min-height: 400px; overflow: hidden; }.globe-instruction { bottom: 10px; }.globe-controls { right: 12px; top: 14px; bottom: auto; }.planning-rail { width: 100%; }.traditional-flight-filters { grid-template-columns: 1fr; }.traditional-flight-filters__price { grid-column: auto; }.traditional-flight-card__details, .traditional-hotel-card__details, .selected-flight dl, .selected-hotel dl { grid-template-columns: 1fr; }.traditional-flight-card__details > div:first-child, .traditional-hotel-card__details > div:nth-child(3), .traditional-hotel-card__details > div:nth-child(4) { grid-column: auto; } }
+@media (max-width: 650px) { .application-header { height: 64px; padding: 0 16px; }.brand { gap: 8px; font-size: 20px; }.brand-orbit { width: 25px; height: 25px; }.header-actions > .badge { display: none; }.assistant-toggle { gap: 7px; padding-left: 10px; font-size: 11px; }.workspace { display: flex; flex-direction: column; gap: 14px; min-height: calc(100vh - 64px); padding: 390px 14px 20px; }.globe-workspace { top: 0; left: 50%; width: 100%; height: 400px; min-height: 400px; overflow: hidden; }.globe-instruction { bottom: 10px; }.globe-controls { right: 12px; top: 14px; bottom: auto; }.planning-rail { width: 100%; }.traditional-flight-filters { grid-template-columns: 1fr; }.traditional-flight-filters__price { grid-column: auto; }.traditional-plan-summary__costs { grid-template-columns: 1fr; }.traditional-flight-card__details, .traditional-hotel-card__details, .selected-flight dl, .selected-hotel dl { grid-template-columns: 1fr; }.traditional-flight-card__details > div:first-child, .traditional-hotel-card__details > div:nth-child(3), .traditional-hotel-card__details > div:nth-child(4) { grid-column: auto; } }
 @media (prefers-reduced-motion: reduce) { .switch-track > span { transition: none; }.assistant-panel, .traditional-results { animation: none; } }

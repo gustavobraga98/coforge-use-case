@@ -160,6 +160,24 @@ export const atlasTravelScenario: TripScenario = {
         stops: 0,
       },
     },
+    {
+      id: 'flexible-flight',
+      label: 'Flexible direct flight',
+      cabin: 'economy',
+      roundTripPriceUsd: 2500,
+      outbound: {
+        departsAt: '2026-11-12T03:15:00-03:00',
+        arrivesAt: '2026-11-12T12:40:00-05:00',
+        durationMinutes: 625,
+        stops: 0,
+      },
+      return: {
+        departsAt: '2026-11-16T21:15:00-05:00',
+        arrivesAt: '2026-11-17T08:45:00-03:00',
+        durationMinutes: 570,
+        stops: 0,
+      },
+    },
   ],
   hotelOptions: [
     {
@@ -191,6 +209,16 @@ export const atlasTravelScenario: TripScenario = {
       checkOutDate: '2026-11-16',
       nights: 4,
       nightlyRateUsd: 185,
+    },
+    {
+      id: 'executive-hotel',
+      label: 'Executive stay',
+      locationSummary: 'Midtown Conference District',
+      comfort: 'enhanced',
+      checkInDate: '2026-11-12',
+      checkOutDate: '2026-11-16',
+      nights: 4,
+      nightlyRateUsd: 285,
     },
   ],
   alternatives: [

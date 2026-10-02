@@ -6,6 +6,7 @@ import {
   evaluateTraditionalFlightOptions,
   type TraditionalFlightFilters,
 } from './traditionalFlightFilters'
+import { TraditionalPlanCostSummary } from './TraditionalPlanCostSummary'
 import { Badge, Button } from './ui'
 
 export type TraditionalResultsTab = 'flights' | 'stays'
@@ -146,6 +147,12 @@ export function TraditionalSearchResults({
         <div><dt>Traveler</dt><dd>{criteria.traveler}</dd></div>
         <div><dt>Dates</dt><dd>{formatDateRange(criteria)}</dd></div>
       </dl>
+
+      <TraditionalPlanCostSummary
+        scenario={scenario}
+        selectedFlightId={selectedFlightId}
+        selectedHotelId={selectedHotelId}
+      />
 
       <div className="traditional-results__tabs" role="tablist" aria-label="Travel result types">
         {tabs.map((tab) => {
@@ -295,7 +302,7 @@ export function TraditionalSearchResults({
           aria-labelledby="traditional-results-tab-stays"
         >
           <div className="traditional-stays__summary">
-            <p>Three simulated stays for the requested period. All are within the {formatPrice(scenario.policy.maxHotelNightlyRateUsd)} nightly policy.</p>
+            <p>{scenario.hotelOptions.length} simulated stays for the requested period. Review each nightly rate against the {formatPrice(scenario.policy.maxHotelNightlyRateUsd)} policy limit.</p>
           </div>
 
           {selectedHotel && (
@@ -318,6 +325,7 @@ export function TraditionalSearchResults({
               const isLowestCost = hotel.nightlyRateUsd === lowestNightlyRate
               const isHighestComfort = comfortOrder[hotel.comfort] === highestComfort
               const totalStay = hotel.nightlyRateUsd * hotel.nights
+              const isWithinPolicy = hotel.nightlyRateUsd <= scenario.policy.maxHotelNightlyRateUsd
 
               return (
                 <li key={hotel.id}>
@@ -341,7 +349,7 @@ export function TraditionalSearchResults({
                       <div><dt>Period</dt><dd>{formatStayPeriod(hotel)}</dd></div>
                       <div><dt>Location</dt><dd>{hotel.locationSummary}</dd></div>
                       <div><dt>Comfort</dt><dd>{formatComfort(hotel.comfort)}</dd></div>
-                      <div><dt>Policy</dt><dd className="traditional-hotel-card__policy">Within policy</dd></div>
+                      <div><dt>Policy</dt><dd className={`traditional-hotel-card__policy${isWithinPolicy ? '' : ' traditional-hotel-card__policy--alert'}`}>{isWithinPolicy ? 'Within policy' : 'Outside policy'}</dd></div>
                     </dl>
                     <Button
                       type="button"

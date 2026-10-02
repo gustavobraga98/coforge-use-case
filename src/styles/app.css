@@ -80,7 +80,7 @@
 .traditional-results { animation: traditional-results-enter 240ms ease-out both; }
 .traditional-results__criteria { display: flex; flex-direction: column; margin: 0; border-top: 1px solid #1b3447; }
 .traditional-results__criteria > div { display: grid; grid-template-columns: minmax(68px, .65fr) minmax(0, 1.35fr); gap: 9px; padding: 9px 2px; border-bottom: 1px solid #1b3447; }
-.traditional-results__criteria dt, .traditional-flight-list dt, .selected-flight dt { color: #9fb6c2; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.traditional-results__criteria dt, .traditional-flight-list dt, .traditional-hotel-list dt, .selected-flight dt, .selected-hotel dt { color: #9fb6c2; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .traditional-results__criteria dd { min-width: 0; margin: 0; color: #e2eef1; font-size: 12px; line-height: 1.45; text-align: right; }
 .traditional-results__tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid #285064; }
 .traditional-results__tab { min-height: 38px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #a9c2cc; cursor: pointer; font-size: 12px; font-weight: 600; }
@@ -119,9 +119,31 @@
 .traditional-flight-card__reasons li + li { margin-top: 2px; }
 .traditional-flight-card__selected-notice { margin: 0; color: #b9d2d9; font-size: 11px; line-height: 1.45; }
 .traditional-flight-card .button { width: 100%; }
-.traditional-results__empty, .traditional-results__stays { padding: 12px; border: 1px dashed #31566b; border-radius: 9px; background: #081724; }
-.traditional-results__empty h3, .traditional-results__stays h3 { margin: 0; color: #dcecef; font-size: 12px; font-weight: 600; line-height: 1.4; }
-.traditional-results__empty p, .traditional-results__stays p { margin: 4px 0 0; color: #a9c2cc; font-size: 11px; line-height: 1.45; }
+.traditional-results__empty { padding: 12px; border: 1px dashed #31566b; border-radius: 9px; background: #081724; }
+.traditional-results__empty h3 { margin: 0; color: #dcecef; font-size: 12px; font-weight: 600; line-height: 1.4; }
+.traditional-results__empty p { margin: 4px 0 0; color: #a9c2cc; font-size: 11px; line-height: 1.45; }
+.traditional-stays__summary { padding: 0 2px; }
+.traditional-stays__summary p { margin: 0; color: #a9c2cc; font-size: 11px; line-height: 1.45; }
+.selected-hotel { display: flex; flex-direction: column; gap: 9px; padding: 12px; border: 1px solid #2b7180; border-radius: 9px; background: #08202d; }
+.selected-hotel > div { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.selected-hotel > div > span { color: #73e1ea; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.selected-hotel h3 { margin: 0; color: #ecf8f8; font-size: 13px; font-weight: 600; }
+.selected-hotel dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.selected-hotel dd { margin: 2px 0 0; color: #e2eef1; font-size: 11px; font-variant-numeric: tabular-nums; }
+.selected-hotel p { margin: 0; color: #aec8d1; font-size: 11px; line-height: 1.45; }
+.traditional-hotel-list { display: flex; flex-direction: column; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.traditional-hotel-card { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid #1b3447; border-radius: 9px; background: #091a29; }
+.traditional-hotel-card--selected { border-color: #47dbe9; background: #0a2130; }
+.traditional-hotel-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.traditional-hotel-card__heading h3 { margin: 3px 0 0; color: #ecf6f7; font-size: 13px; font-weight: 600; line-height: 1.35; }
+.traditional-hotel-card__heading > strong { flex: 0 0 auto; color: #f1f8f8; font-size: 13px; font-variant-numeric: tabular-nums; }
+.traditional-hotel-card__features { display: flex; flex-wrap: wrap; gap: 6px; }
+.traditional-hotel-card__features span { color: #c5d5db; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.traditional-hotel-card__details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding-top: 9px; border-top: 1px solid #1b3447; }
+.traditional-hotel-card__details > div:nth-child(3), .traditional-hotel-card__details > div:nth-child(4) { grid-column: 1 / -1; }
+.traditional-hotel-card__details dd { margin: 2px 0 0; color: #e2eef1; font-size: 11px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.traditional-hotel-card__policy { color: #73e1ea !important; font-weight: 600; }
+.traditional-hotel-card .button { width: 100%; }
 @keyframes traditional-results-enter { from { opacity: .65; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 .assistant-panel { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; padding: 16px 4px 4px; border-top: 1px solid #285064; animation: assistant-panel-enter 260ms ease-out both; }
 .assistant-panel__heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -156,5 +178,5 @@
 
 @media (max-width: 1120px) { .workspace { grid-template-columns: 220px minmax(0, 1fr) 220px; gap: 12px; padding: 20px 14px; }.planning-rail { padding: 9px; }.globe-workspace { width: 100vw; } }
 @media (max-width: 850px) { .workspace { grid-template-columns: 220px 1fr; }.planning-rail--right { grid-column: 1; grid-row: 2; }.globe-workspace { left: 54%; } }
-@media (max-width: 650px) { .application-header { height: 64px; padding: 0 16px; }.brand { gap: 8px; font-size: 20px; }.brand-orbit { width: 25px; height: 25px; }.header-actions > .badge { display: none; }.assistant-toggle { gap: 7px; padding-left: 10px; font-size: 11px; }.workspace { display: flex; flex-direction: column; gap: 14px; min-height: calc(100vh - 64px); padding: 390px 14px 20px; }.globe-workspace { top: 0; left: 50%; width: 100%; height: 400px; min-height: 400px; overflow: hidden; }.globe-instruction { bottom: 10px; }.globe-controls { right: 12px; top: 14px; bottom: auto; }.planning-rail { width: 100%; }.traditional-flight-filters { grid-template-columns: 1fr; }.traditional-flight-filters__price { grid-column: auto; }.traditional-flight-card__details, .selected-flight dl { grid-template-columns: 1fr; }.traditional-flight-card__details > div:first-child { grid-column: auto; } }
+@media (max-width: 650px) { .application-header { height: 64px; padding: 0 16px; }.brand { gap: 8px; font-size: 20px; }.brand-orbit { width: 25px; height: 25px; }.header-actions > .badge { display: none; }.assistant-toggle { gap: 7px; padding-left: 10px; font-size: 11px; }.workspace { display: flex; flex-direction: column; gap: 14px; min-height: calc(100vh - 64px); padding: 390px 14px 20px; }.globe-workspace { top: 0; left: 50%; width: 100%; height: 400px; min-height: 400px; overflow: hidden; }.globe-instruction { bottom: 10px; }.globe-controls { right: 12px; top: 14px; bottom: auto; }.planning-rail { width: 100%; }.traditional-flight-filters { grid-template-columns: 1fr; }.traditional-flight-filters__price { grid-column: auto; }.traditional-flight-card__details, .traditional-hotel-card__details, .selected-flight dl, .selected-hotel dl { grid-template-columns: 1fr; }.traditional-flight-card__details > div:first-child, .traditional-hotel-card__details > div:nth-child(3), .traditional-hotel-card__details > div:nth-child(4) { grid-column: auto; } }
 @media (prefers-reduced-motion: reduce) { .switch-track > span { transition: none; }.assistant-panel, .traditional-results { animation: none; } }

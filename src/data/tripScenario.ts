@@ -29,6 +29,7 @@ export type FlightOption = {
 export type HotelOption = {
   id: string
   label: string
+  locationSummary: string
   comfort: 'essential' | 'standard' | 'enhanced'
   checkInDate: string
   checkOutDate: string
@@ -164,6 +165,7 @@ export const atlasTravelScenario: TripScenario = {
     {
       id: 'essential-hotel',
       label: 'Essential stay',
+      locationSummary: 'Central Business Quarter',
       comfort: 'essential',
       checkInDate: '2026-11-12',
       checkOutDate: '2026-11-16',
@@ -173,6 +175,7 @@ export const atlasTravelScenario: TripScenario = {
     {
       id: 'enhanced-hotel',
       label: 'Enhanced stay',
+      locationSummary: 'Parkside District',
       comfort: 'enhanced',
       checkInDate: '2026-11-12',
       checkOutDate: '2026-11-16',
@@ -182,6 +185,7 @@ export const atlasTravelScenario: TripScenario = {
     {
       id: 'standard-hotel',
       label: 'Standard stay',
+      locationSummary: 'Riverside District',
       comfort: 'standard',
       checkInDate: '2026-11-12',
       checkOutDate: '2026-11-16',

@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react'
-import type { FlightLeg, FlightOption, TripScenario } from '../data/tripScenario'
+import type { FlightLeg, FlightOption, HotelOption, TripScenario } from '../data/tripScenario'
 import type { TraditionalSearchCriteria } from './TraditionalSearchForm'
 import {
   createInitialTraditionalFlightFilters,
@@ -16,9 +16,11 @@ type TraditionalSearchResultsProps = {
   filters: TraditionalFlightFilters
   activeTab: TraditionalResultsTab
   selectedFlightId: string | null
+  selectedHotelId: string | null
   onFiltersChange: (filters: TraditionalFlightFilters) => void
   onActiveTabChange: (tab: TraditionalResultsTab) => void
   onFlightSelect: (flightId: string) => void
+  onHotelSelect: (hotelId: string) => void
   onModifySearch: () => void
 }
 
@@ -69,15 +71,25 @@ function formatDateRange(criteria: TraditionalSearchCriteria): string {
   return `${criteria.departureDate} to ${criteria.returnDate}`
 }
 
+function formatComfort(comfort: HotelOption['comfort']): string {
+  return `${comfort.charAt(0).toUpperCase()}${comfort.slice(1)} comfort`
+}
+
+function formatStayPeriod(hotel: HotelOption): string {
+  return `${hotel.checkInDate} to ${hotel.checkOutDate} · ${hotel.nights} nights`
+}
+
 export function TraditionalSearchResults({
   scenario,
   criteria,
   filters,
   activeTab,
   selectedFlightId,
+  selectedHotelId,
   onFiltersChange,
   onActiveTabChange,
   onFlightSelect,
+  onHotelSelect,
   onModifySearch,
 }: TraditionalSearchResultsProps) {
   const evaluatedFlights = evaluateTraditionalFlightOptions(scenario, filters)
@@ -89,6 +101,12 @@ export function TraditionalSearchResults({
   const tradeOffsByFlightId = new Map(
     scenario.alternatives.map((alternative) => [alternative.flightOptionId, alternative.label]),
   )
+  const selectedHotel = selectedHotelId === null
+    ? null
+    : scenario.hotelOptions.find(({ id }) => id === selectedHotelId) ?? null
+  const lowestNightlyRate = Math.min(...scenario.hotelOptions.map(({ nightlyRateUsd }) => nightlyRateUsd))
+  const comfortOrder: Record<HotelOption['comfort'], number> = { essential: 0, standard: 1, enhanced: 2 }
+  const highestComfort = Math.max(...scenario.hotelOptions.map(({ comfort }) => comfortOrder[comfort]))
 
   function updateFilter<Key extends keyof TraditionalFlightFilters>(key: Key, value: TraditionalFlightFilters[Key]) {
     onFiltersChange({ ...filters, [key]: value })
@@ -272,12 +290,72 @@ export function TraditionalSearchResults({
       ) : (
         <div
           id="traditional-results-panel-stays"
-          className="traditional-results__panel traditional-results__stays"
+          className="traditional-results__panel"
           role="tabpanel"
           aria-labelledby="traditional-results-tab-stays"
         >
-          <h3>Stay results are coming next</h3>
-          <p>Simulated stay results and their filters will be added in T11. Your flight filters remain available when you return to Flights.</p>
+          <div className="traditional-stays__summary">
+            <p>Three simulated stays for the requested period. All are within the {formatPrice(scenario.policy.maxHotelNightlyRateUsd)} nightly policy.</p>
+          </div>
+
+          {selectedHotel && (
+            <section className="selected-hotel" aria-labelledby="selected-hotel-heading">
+              <div>
+                <span>Selected stay</span>
+                <h3 id="selected-hotel-heading">{selectedHotel.label}</h3>
+              </div>
+              <dl>
+                <div><dt>Total stay</dt><dd>{formatPrice(selectedHotel.nightlyRateUsd * selectedHotel.nights)}</dd></div>
+                <div><dt>Period</dt><dd>{selectedHotel.nights} nights</dd></div>
+              </dl>
+              <p>Choose another stay below to change this selection.</p>
+            </section>
+          )}
+
+          <ul className="traditional-hotel-list" aria-label={`${scenario.hotelOptions.length} simulated hotel options`}>
+            {scenario.hotelOptions.map((hotel) => {
+              const isSelected = selectedHotelId === hotel.id
+              const isLowestCost = hotel.nightlyRateUsd === lowestNightlyRate
+              const isHighestComfort = comfortOrder[hotel.comfort] === highestComfort
+              const totalStay = hotel.nightlyRateUsd * hotel.nights
+
+              return (
+                <li key={hotel.id}>
+                  <article
+                    className={`traditional-hotel-card${isSelected ? ' traditional-hotel-card--selected' : ''}`}
+                    aria-label={`${hotel.label}${isSelected ? ', selected' : ''}`}
+                  >
+                    <div className="traditional-hotel-card__heading">
+                      <div>
+                        <div className="traditional-hotel-card__features">
+                          {isLowestCost && <span>Lowest cost</span>}
+                          {isHighestComfort && <span>Highest comfort</span>}
+                        </div>
+                        <h3>{hotel.label}</h3>
+                      </div>
+                      <strong>{formatPrice(totalStay)}</strong>
+                    </div>
+                    <dl className="traditional-hotel-card__details">
+                      <div><dt>Nightly rate</dt><dd>{formatPrice(hotel.nightlyRateUsd)}</dd></div>
+                      <div><dt>Stay total</dt><dd>{formatPrice(totalStay)}</dd></div>
+                      <div><dt>Period</dt><dd>{formatStayPeriod(hotel)}</dd></div>
+                      <div><dt>Location</dt><dd>{hotel.locationSummary}</dd></div>
+                      <div><dt>Comfort</dt><dd>{formatComfort(hotel.comfort)}</dd></div>
+                      <div><dt>Policy</dt><dd className="traditional-hotel-card__policy">Within policy</dd></div>
+                    </dl>
+                    <Button
+                      type="button"
+                      tone={isSelected ? 'quiet' : 'primary'}
+                      aria-pressed={isSelected}
+                      onClick={() => onHotelSelect(hotel.id)}
+                    >
+                      {isSelected ? 'Selected stay' : `Select ${hotel.label}`}
+                    </Button>
+                  </article>
+                </li>
+              )
+            })}
+          </ul>
         </div>
       )}
 

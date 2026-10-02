@@ -22,7 +22,7 @@ export default function App() {
           <span>Atlas <span className="brand-light">Travel</span></span>
         </a>
         <div className="header-actions">
-          <Badge tone="muted">Demonstration</Badge>
+          <Badge tone="muted">Fictional demo</Badge>
           <Button
             className="assistant-toggle"
             tone="quiet"
@@ -46,13 +46,13 @@ export default function App() {
         <Surface as="aside" className="planning-rail planning-rail--left" label="Route overview">
           <div className="rail-heading">
             <h1>Route overview</h1>
-            <Badge>Illustrative</Badge>
+            <Badge>Simulated route</Badge>
           </div>
           <Card className="mini-map-card" label="Map preview of the simulated route">
             <RouteMapPreview route={route} />
             <p className="map-caption">{route.origin.city} <span>→</span> {route.destination.city}</p>
           </Card>
-          <div className="itinerary-preview" aria-label="Illustrative itinerary preview">
+          <div className="itinerary-preview" role="group" aria-label="Simulated itinerary preview">
             <div className="itinerary-line" aria-hidden="true" />
             <Card className="itinerary-stop" label="Origin">
               <span className="stop-dot" aria-hidden="true" />

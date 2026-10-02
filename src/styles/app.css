@@ -1,6 +1,6 @@
 #root, .application-shell { min-height: 100vh; }
 
-.application-shell { overflow: hidden; color: #e8f2f5; background: #050b14; }
+.application-shell { overflow-x: clip; color: #e8f2f5; background: #050b14; }
 .application-header { position: relative; z-index: 5; height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; background: #060e19; border-bottom: 1px solid #1a3143; }
 .brand { display: inline-flex; align-items: center; gap: 15px; color: #f4f8f8; text-decoration: none; font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 600; letter-spacing: -.025em; }
 .brand-light { color: #c4d0d7; font-weight: 400; }

@@ -54,7 +54,7 @@ export function GlobeWorkspace({ route, assistantEnabled }: GlobeWorkspaceProps)
   }
 
   return (
-    <section className={`globe-workspace ${assistantEnabled ? 'globe-workspace--assisted' : ''}`} aria-label={`Interactive globe showing an illustrative ${route.origin.city} to ${route.destination.city} route`}>
+    <section className={`globe-workspace ${assistantEnabled ? 'globe-workspace--assisted' : ''}`} aria-label={`Interactive globe showing a simulated ${route.origin.city} to ${route.destination.city} route`}>
       <Globe
         ref={globeRef}
         width={dimensions.width}
@@ -78,7 +78,7 @@ export function GlobeWorkspace({ route, assistantEnabled }: GlobeWorkspaceProps)
         pointAltitude={0.025}
         pointRadius={0.65}
       />
-      <div className="globe-controls" aria-label="Globe controls">
+      <div className="globe-controls" role="group" aria-label="Globe controls">
         <button className="center-control" type="button" onClick={() => globeRef.current?.pointOfView(initialView, 450)} aria-label="Center route on globe">Center</button>
         <button type="button" onClick={() => changeZoom('in')} aria-label="Zoom in on globe">+</button>
         <button type="button" onClick={() => changeZoom('out')} aria-label="Zoom out on globe">−</button>

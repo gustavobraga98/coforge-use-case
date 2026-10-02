@@ -46,12 +46,12 @@ export function AssistantPanel({ scenario }: AssistantPanelProps) {
         <Badge>Planning</Badge>
       </div>
 
-      <div className="assistant-message assistant-message--traveler" aria-label={`${traveler.firstName}'s planning request`}>
+      <article className="assistant-message assistant-message--traveler" aria-label={`${traveler.firstName}'s fictional planning request`}>
         <span className="assistant-message__author">{traveler.firstName}</span>
         <p>{request.naturalLanguage}</p>
-      </div>
+      </article>
 
-      <div className="assistant-message assistant-message--assistant" aria-labelledby="assistant-response-heading">
+      <article className="assistant-message assistant-message--assistant" aria-labelledby="assistant-response-heading">
         <span className="assistant-message__author">Atlas Travel</span>
         <h3 id="assistant-response-heading">I&apos;ll organize this trip around the following requirements.</h3>
         <ul className="assistant-requirements" aria-label="Recognized trip requirements">
@@ -61,13 +61,13 @@ export function AssistantPanel({ scenario }: AssistantPanelProps) {
           <li><span>Flight preference</span><strong>{request.directFlightsPreferred ? 'Direct flights' : 'No preference specified'}</strong></li>
           <li><span>Budget ceiling</span><strong>{budgetFormatter.format(budget.limit)}</strong></li>
         </ul>
-      </div>
+      </article>
 
       <p className="assistant-panel__planning-status" role="status">
         <span aria-hidden="true" /> Organizing your plan
       </p>
 
-      <div className="assistant-alternatives" aria-label="Alternative planning areas">
+      <div className="assistant-alternatives" role="group" aria-label="Simulated alternative planning areas">
         <section className="assistant-placeholder" aria-labelledby="flight-alternatives-heading">
           <h3 id="flight-alternatives-heading">Flight alternatives</h3>
           <p>Suitable flight alternatives will appear here.</p>

@@ -57,7 +57,7 @@ export function TripContextSummary({ scenario, status = scenario.initialTripStat
           <h2 id="trip-context-heading">Trip context</h2>
           <p>Planning request for {traveler.firstName}</p>
         </div>
-        <Badge tone="muted">Illustrative</Badge>
+        <Badge tone="muted">Fictional scenario</Badge>
       </div>
 
       <Card className="trip-context__status" label={`Trip status: ${statusLabels[status]}`}>

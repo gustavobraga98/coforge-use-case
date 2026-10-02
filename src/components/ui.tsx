@@ -25,5 +25,5 @@ export function Button({ tone = 'primary', className = '', ...props }: ButtonPro
 type CardProps = PropsWithChildren<HTMLAttributes<HTMLDivElement> & { label: string }>
 
 export function Card({ children, className = '', label, ...props }: CardProps) {
-  return <div className={`card ${className}`} aria-label={label} {...props}>{children}</div>
+  return <div className={`card ${className}`} role="group" aria-label={label} {...props}>{children}</div>
 }

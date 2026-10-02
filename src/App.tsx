@@ -1,5 +1,10 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { AssistantPanel } from './components/AssistantPanel'
+import {
+  SearchReadyPanel,
+  TraditionalSearchForm,
+  type TraditionalSearchCriteria,
+} from './components/TraditionalSearchForm'
 import { Badge, Button, Card, Surface } from './components/ui'
 import { RouteMapPreview } from './components/RouteMapPreview'
 import { TripContextSummary } from './components/TripContextSummary'
@@ -10,9 +15,39 @@ const GlobeWorkspace = lazy(() =>
   import('./components/GlobeWorkspace').then(({ GlobeWorkspace }) => ({ default: GlobeWorkspace })),
 )
 
+function createInitialTraditionalSearchCriteria(): TraditionalSearchCriteria {
+  return {
+    traveler: atlasTravelScenario.traveler.firstName,
+    origin: atlasTravelScenario.request.route.origin.city,
+    destination: atlasTravelScenario.request.route.destination.city,
+    departureDate: atlasTravelScenario.request.departureDate,
+    returnDate: atlasTravelScenario.request.returnDate,
+  }
+}
+
 export default function App() {
   const [assistantEnabled, setAssistantEnabled] = useState(false)
+  const [traditionalSearchCriteria, setTraditionalSearchCriteria] = useState<TraditionalSearchCriteria>(() =>
+    createInitialTraditionalSearchCriteria(),
+  )
+  const [traditionalSearchState, setTraditionalSearchState] = useState<'form' | 'searching' | 'results'>('form')
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const route = atlasTravelScenario.request.route
+  const isTraditionalSearchActive = traditionalSearchState !== 'form'
+
+  useEffect(() => () => {
+    if (searchTimeout.current !== null) {
+      clearTimeout(searchTimeout.current)
+    }
+  }, [])
+
+  function searchTraditionalOptions() {
+    setTraditionalSearchState('searching')
+    searchTimeout.current = setTimeout(() => {
+      setTraditionalSearchState('results')
+      searchTimeout.current = null
+    }, 500)
+  }
 
   return (
     <main className={`application-shell ${assistantEnabled ? 'application-shell--assisted' : 'application-shell--traditional'}`} id="workspace">
@@ -71,9 +106,24 @@ export default function App() {
         <Surface as="aside" className="planning-rail planning-rail--right" label="Planning panels">
           <TripContextSummary
             scenario={atlasTravelScenario}
-            status={assistantEnabled ? 'planning' : atlasTravelScenario.initialTripState.status}
+            status={assistantEnabled || isTraditionalSearchActive ? 'planning' : atlasTravelScenario.initialTripState.status}
           />
-          {assistantEnabled && <AssistantPanel scenario={atlasTravelScenario} />}
+          {assistantEnabled ? (
+            <AssistantPanel scenario={atlasTravelScenario} />
+          ) : traditionalSearchState === 'results' ? (
+            <SearchReadyPanel
+              criteria={traditionalSearchCriteria}
+              onModifySearch={() => setTraditionalSearchState('form')}
+            />
+          ) : (
+            <TraditionalSearchForm
+              scenario={atlasTravelScenario}
+              criteria={traditionalSearchCriteria}
+              isSearching={traditionalSearchState === 'searching'}
+              onCriteriaChange={setTraditionalSearchCriteria}
+              onSubmit={searchTraditionalOptions}
+            />
+          )}
         </Surface>
       </div>
     </main>

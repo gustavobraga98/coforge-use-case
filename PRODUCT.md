@@ -30,6 +30,7 @@ The principal scenario is a fictional trip for Gustavo from São Paulo to New Yo
 - It must support traditional and AI-assisted planning without changing the underlying trip data or rules.
 - The experience includes an interactive local 3D globe with real geography; trip routes and all travel information remain simulated.
 - Reusable interface components must be compatible with future CopilotKit v2 Generative UI integration: typed, structured props are required, and the assistant must not generate arbitrary interface markup.
+- The later assisted implementation will add a local Python/FastAPI backend and a PydanticAI agent. CopilotKit will connect that agent to registered React GenUI components while preserving the existing web interface as the planning surface.
 - All names, itineraries, values, policies, reservations, suppliers, and business operations are fictional.
 - It must not connect to real services, make purchases or bookings, communicate externally, retain customer data, or reproduce a client's flows, rules, or data.
 

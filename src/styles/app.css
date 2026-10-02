@@ -63,6 +63,28 @@
 .trip-context__details dd { min-width: 0; margin: 0; color: #e2eef1; font-size: 12px; line-height: 1.45; text-align: right; }
 .trip-context__route dd { color: #67ddea; font-weight: 600; }
 .trip-context__route dd span { margin: 0 3px; color: #f4c66d; }
+.traditional-search, .search-ready { display: flex; flex-direction: column; gap: 13px; margin-top: 4px; padding: 16px 4px 4px; border-top: 1px solid #285064; }
+.traditional-search__heading, .search-ready__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.traditional-search__heading h2, .search-ready__heading h2 { margin: 0; color: #eaf6f7; font: 600 16px/1.25 'Space Grotesk', sans-serif; letter-spacing: -.02em; }
+.traditional-search__heading p, .search-ready__heading p { margin: 4px 0 0; color: #a9c2cc; font-size: 11px; line-height: 1.45; }
+.traditional-search__form { display: flex; flex-direction: column; gap: 10px; }
+.traditional-search__route-fields, .traditional-search__date-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field > span { color: #9fb6c2; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.field input, .field select { width: 100%; min-width: 0; min-height: 37px; border: 1px solid #294a5f; border-radius: 7px; padding: 8px 9px; background: #081926; color: #e8f2f5; font-size: 12px; }
+.field input::placeholder { color: #8aa7b4; }
+.field input:hover, .field select:hover { border-color: #487087; }
+.field input:disabled, .field select:disabled { cursor: wait; color: #9fb6c2; }
+.traditional-search__form .button { width: 100%; margin-top: 3px; }
+.traditional-search__notice { margin: 0; color: #9fb6c2; font-size: 11px; line-height: 1.45; }
+.search-ready { animation: search-ready-enter 240ms ease-out both; }
+.search-ready__criteria { display: flex; flex-direction: column; margin: 0; border-top: 1px solid #1b3447; }
+.search-ready__criteria > div { display: grid; grid-template-columns: minmax(68px, .65fr) minmax(0, 1.35fr); gap: 9px; padding: 9px 2px; border-bottom: 1px solid #1b3447; }
+.search-ready__criteria dt { color: #9fb6c2; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.search-ready__criteria dd { min-width: 0; margin: 0; color: #e2eef1; font-size: 12px; line-height: 1.45; text-align: right; }
+.search-ready__criteria dd span { margin: 0 3px; color: #f4c66d; }
+.search-ready__next-step { margin: 0; padding: 10px 11px; border: 1px dashed #31566b; border-radius: 9px; background: #081724; color: #a9c2cc; font-size: 11px; line-height: 1.45; }
+@keyframes search-ready-enter { from { opacity: .65; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 .assistant-panel { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; padding: 16px 4px 4px; border-top: 1px solid #285064; animation: assistant-panel-enter 260ms ease-out both; }
 .assistant-panel__heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .assistant-panel__heading h2 { margin: 0; font: 600 16px/1.25 'Space Grotesk', sans-serif; letter-spacing: -.02em; }
@@ -97,4 +119,4 @@
 @media (max-width: 1120px) { .workspace { grid-template-columns: 220px minmax(0, 1fr) 220px; gap: 12px; padding: 20px 14px; }.planning-rail { padding: 9px; }.globe-workspace { width: 100vw; } }
 @media (max-width: 850px) { .workspace { grid-template-columns: 220px 1fr; }.planning-rail--right { grid-column: 1; grid-row: 2; }.globe-workspace { left: 54%; } }
 @media (max-width: 650px) { .application-header { height: 64px; padding: 0 16px; }.brand { gap: 8px; font-size: 20px; }.brand-orbit { width: 25px; height: 25px; }.header-actions > .badge { display: none; }.assistant-toggle { gap: 7px; padding-left: 10px; font-size: 11px; }.workspace { display: flex; flex-direction: column; gap: 14px; min-height: calc(100vh - 64px); padding: 390px 14px 20px; }.globe-workspace { top: 0; left: 50%; width: 100%; height: 400px; min-height: 400px; overflow: hidden; }.globe-instruction { bottom: 10px; }.globe-controls { right: 12px; top: 14px; bottom: auto; }.planning-rail { width: 100%; } }
-@media (prefers-reduced-motion: reduce) { .switch-track > span { transition: none; }.assistant-panel { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .switch-track > span { transition: none; }.assistant-panel, .search-ready { animation: none; } }

@@ -1,10 +1,17 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { AssistantPanel } from './components/AssistantPanel'
 import {
-  SearchReadyPanel,
   TraditionalSearchForm,
   type TraditionalSearchCriteria,
 } from './components/TraditionalSearchForm'
+import {
+  TraditionalSearchResults,
+  type TraditionalResultsTab,
+} from './components/TraditionalSearchResults'
+import {
+  createInitialTraditionalFlightFilters,
+  type TraditionalFlightFilters,
+} from './components/traditionalFlightFilters'
 import { Badge, Button, Card, Surface } from './components/ui'
 import { RouteMapPreview } from './components/RouteMapPreview'
 import { TripContextSummary } from './components/TripContextSummary'
@@ -31,6 +38,10 @@ export default function App() {
     createInitialTraditionalSearchCriteria(),
   )
   const [traditionalSearchState, setTraditionalSearchState] = useState<'form' | 'searching' | 'results'>('form')
+  const [traditionalFlightFilters, setTraditionalFlightFilters] = useState<TraditionalFlightFilters>(() =>
+    createInitialTraditionalFlightFilters(),
+  )
+  const [traditionalResultsTab, setTraditionalResultsTab] = useState<TraditionalResultsTab>('flights')
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const route = atlasTravelScenario.request.route
   const isTraditionalSearchActive = traditionalSearchState !== 'form'
@@ -111,8 +122,13 @@ export default function App() {
           {assistantEnabled ? (
             <AssistantPanel scenario={atlasTravelScenario} />
           ) : traditionalSearchState === 'results' ? (
-            <SearchReadyPanel
+            <TraditionalSearchResults
+              scenario={atlasTravelScenario}
               criteria={traditionalSearchCriteria}
+              filters={traditionalFlightFilters}
+              activeTab={traditionalResultsTab}
+              onFiltersChange={setTraditionalFlightFilters}
+              onActiveTabChange={setTraditionalResultsTab}
               onModifySearch={() => setTraditionalSearchState('form')}
             />
           ) : (

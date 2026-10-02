@@ -18,11 +18,6 @@ type TraditionalSearchFormProps = {
   onSubmit: () => void
 }
 
-type SearchReadyPanelProps = {
-  criteria: TraditionalSearchCriteria
-  onModifySearch: () => void
-}
-
 export function TraditionalSearchForm({
   scenario,
   criteria,
@@ -115,27 +110,6 @@ export function TraditionalSearchForm({
           {isSearching ? 'Searching simulated options locally.' : 'No live availability or external booking is used.'}
         </p>
       </form>
-    </section>
-  )
-}
-
-export function SearchReadyPanel({ criteria, onModifySearch }: SearchReadyPanelProps) {
-  return (
-    <section className="search-ready" aria-labelledby="search-ready-heading">
-      <div className="search-ready__heading">
-        <div>
-          <h2 id="search-ready-heading">Options ready to review</h2>
-          <p>Simulated options match the submitted search.</p>
-        </div>
-        <Badge>Search complete</Badge>
-      </div>
-      <dl className="search-ready__criteria">
-        <div><dt>Traveler</dt><dd>{criteria.traveler}</dd></div>
-        <div><dt>Route</dt><dd>{criteria.origin} <span aria-hidden="true">→</span> {criteria.destination}</dd></div>
-        <div><dt>Dates</dt><dd>{criteria.departureDate} to {criteria.returnDate}</dd></div>
-      </dl>
-      <p className="search-ready__next-step">Flight and stay filters will appear here next.</p>
-      <Button type="button" tone="quiet" onClick={onModifySearch}>Modify search</Button>
     </section>
   )
 }

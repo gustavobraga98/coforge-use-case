@@ -210,10 +210,9 @@
 .assistant-requirements strong { color: #dcecef; font-size: 11px; font-weight: 500; line-height: 1.45; text-align: right; }
 .assistant-panel__planning-status { display: flex; align-items: center; gap: 8px; margin: 0; color: #78e1e9; font-size: 12px; font-weight: 600; }
 .assistant-panel__planning-status span { width: 7px; height: 7px; border-radius: 50%; background: #47dbe9; box-shadow: 0 0 8px #47dbe980; }
-.assistant-alternatives { display: grid; gap: 8px; }
-.assistant-placeholder { padding: 11px 12px; border: 1px dashed #31566b; border-radius: 9px; background: #081724; }
-.assistant-placeholder h3 { margin: 0; color: #dcecef; font-size: 11px; font-weight: 600; }
-.assistant-placeholder p { margin: 4px 0 0; color: #a9c2cc; font-size: 11px; line-height: 1.45; }
+.assistant-next-step { padding: 12px; border: 1px solid #31566b; border-radius: 9px; background: #081724; }
+.assistant-next-step h3 { margin: 0; color: #dcecef; font-size: 12px; font-weight: 600; }
+.assistant-next-step p { margin: 4px 0 0; color: #a9c2cc; font-size: 12px; line-height: 1.45; }
 @keyframes assistant-panel-enter { from { opacity: .65; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 .globe-workspace { position: absolute; z-index: 1; top: 0; left: 50%; transform: translateX(-50%); width: min(100vw, 1150px); height: calc(100vh - 72px); min-height: 720px; display: grid; place-items: center; }
 .globe-workspace canvas { display: block; filter: brightness(1.14) saturate(1.08); }
@@ -225,7 +224,58 @@
 .globe-controls button:hover { background: #12344a; }
 .globe-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #b6d6df; }
 
-@media (max-width: 1120px) { .workspace { grid-template-columns: 220px minmax(0, 1fr) 220px; gap: 12px; padding: 20px 14px; }.planning-rail { padding: 9px; }.globe-workspace { width: 100vw; } }
-@media (max-width: 850px) { .workspace { grid-template-columns: 220px 1fr; }.planning-rail--right { grid-column: 1 / -1; grid-row: 2; }.globe-workspace { left: 54%; } }
-@media (max-width: 650px) { .application-header { height: 64px; padding: 0 16px; }.brand { gap: 8px; font-size: 20px; }.brand-orbit { width: 25px; height: 25px; }.header-actions > .badge { display: none; }.assistant-toggle { gap: 7px; padding-left: 10px; font-size: 11px; }.workspace { display: flex; flex-direction: column; gap: 14px; min-height: calc(100vh - 64px); padding: 390px 14px 20px; }.globe-workspace { top: 0; left: 50%; width: 100%; height: 400px; min-height: 400px; overflow: hidden; }.globe-instruction { bottom: 10px; }.globe-controls { right: 12px; top: 14px; bottom: auto; }.planning-rail { width: 100%; }.traditional-flight-filters { grid-template-columns: 1fr; }.traditional-flight-filters__price { grid-column: auto; }.traditional-plan-summary__costs { grid-template-columns: 1fr; }.traditional-confirmation__actions { grid-template-columns: 1fr; }.traditional-flight-card__details, .traditional-hotel-card__details, .selected-flight dl, .selected-hotel dl { grid-template-columns: 1fr; }.traditional-flight-card__details > div:first-child, .traditional-hotel-card__details > div:nth-child(3), .traditional-hotel-card__details > div:nth-child(4) { grid-column: auto; } }
+/* The orbital canvas leads the opening. Once choices are on screen, the task gets the widest column. */
+.workspace--task-focused {
+  grid-template-columns: minmax(230px, 300px) minmax(0, 760px) minmax(250px, 310px);
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 18px 24px;
+}
+.workspace--task-focused .planning-rail { background: #071522f2; }
+.workspace--task-focused .planning-rail--right {
+  grid-column: 2;
+  grid-row: 1;
+  max-height: calc(100vh - 108px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.workspace--task-focused .planning-rail--summary { grid-column: 3; grid-row: 1; align-self: start; }
+.workspace--task-focused .globe-workspace--compact {
+  position: relative;
+  z-index: 2;
+  grid-column: 1;
+  grid-row: 1;
+  left: auto;
+  width: 100%;
+  height: 300px;
+  min-height: 300px;
+  overflow: hidden;
+  transform: none;
+}
+.globe-workspace--compact canvas { filter: brightness(1.1) saturate(1.02); }
+.globe-workspace--compact .globe-controls { top: 12px; right: 12px; bottom: auto; }
+.globe-workspace--compact .globe-instruction { bottom: 10px; }
+.planning-progress { padding: 2px 4px 14px; border-bottom: 1px solid #285064; }
+.planning-progress ol { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; }
+.planning-progress li { display: flex; min-width: 0; align-items: center; gap: 7px; color: #89a5b1; font-size: 11px; line-height: 1.25; }
+.planning-progress li > span { display: grid; width: 20px; height: 20px; flex: 0 0 auto; place-items: center; border: 1px solid #34546a; border-radius: 50%; color: #9db7c1; font-size: 10px; font-weight: 700; }
+.planning-progress li > strong { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.planning-progress__step--complete { color: #9edfe5 !important; }
+.planning-progress__step--complete > span { border-color: #37818b !important; background: #0b2c36; color: #75e2e9 !important; }
+.planning-progress__step--current { color: #eefafb !important; }
+.planning-progress__step--current > span { border-color: #47dbe9 !important; background: #47dbe9; color: #03121a !important; }
+.workspace--task-focused .traditional-results,
+.workspace--task-focused .traditional-confirmation { padding-top: 2px; border-top: 0; }
+.workspace--task-focused .traditional-plan-summary { position: sticky; z-index: 2; top: -1px; padding-top: 14px; background: #081a27; }
+.trip-context--compact { gap: 10px; }
+.trip-context--compact .trip-context__heading { padding-top: 2px; }
+.trip-context--compact .trip-context__details > div { grid-template-columns: minmax(62px, .65fr) minmax(0, 1.35fr); padding: 10px 1px; }
+.trip-context--compact .trip-context__details dd { font-size: 12px; }
+
+@media (max-width: 1120px) { .workspace { grid-template-columns: 220px minmax(0, 1fr) 220px; gap: 12px; padding: 20px 14px; }.planning-rail { padding: 9px; }.globe-workspace { width: 100vw; }.workspace--task-focused { grid-template-columns: minmax(0, 1fr) 260px; max-width: 1080px; }.workspace--task-focused .planning-rail--right { grid-column: 1; }.workspace--task-focused .planning-rail--summary { grid-column: 2; }.workspace--task-focused .globe-workspace--compact { display: none; } }
+@media (max-width: 850px) { .workspace { grid-template-columns: 220px 1fr; }.planning-rail--right { grid-column: 1 / -1; grid-row: 2; }.globe-workspace { left: 54%; }.workspace--task-focused { display: flex; flex-direction: column; gap: 14px; padding: 16px; }.workspace--task-focused .planning-rail--right, .workspace--task-focused .planning-rail--summary { width: 100%; max-height: none; overflow: visible; }.workspace--task-focused .planning-rail--summary { order: 2; }.workspace--task-focused .globe-workspace--compact { display: grid; order: 3; width: min(100%, 420px); align-self: center; } }
+@media (max-width: 650px) { .application-header { height: 64px; padding: 0 16px; }.brand { gap: 8px; font-size: 20px; }.brand-orbit { width: 25px; height: 25px; }.header-actions > .badge { display: none; }.assistant-toggle { gap: 7px; padding-left: 10px; font-size: 11px; }.workspace { display: flex; flex-direction: column; gap: 14px; min-height: calc(100vh - 64px); padding: 390px 14px 20px; }.globe-workspace { top: 0; left: 50%; width: 100%; height: 400px; min-height: 400px; overflow: hidden; }.globe-instruction { bottom: 10px; }.globe-controls { right: 12px; top: 14px; bottom: auto; }.planning-rail { width: 100%; }.workspace--task-focused { min-height: calc(100vh - 64px); padding: 14px; }.workspace--task-focused .globe-workspace--compact { height: 220px; min-height: 220px; }.planning-progress { padding-bottom: 12px; }.planning-progress ol { gap: 2px; }.planning-progress li { gap: 5px; font-size: 10px; }.planning-progress li > span { width: 22px; height: 22px; }.traditional-flight-filters { grid-template-columns: 1fr; }.traditional-flight-filters__price { grid-column: auto; }.traditional-plan-summary__costs { grid-template-columns: 1fr; }.traditional-confirmation__actions { grid-template-columns: 1fr; }.traditional-flight-card__details, .traditional-hotel-card__details, .selected-flight dl, .selected-hotel dl { grid-template-columns: 1fr; }.traditional-flight-card__details > div:first-child, .traditional-hotel-card__details > div:nth-child(3), .traditional-hotel-card__details > div:nth-child(4) { grid-column: auto; } }
+@media (max-width: 390px) { .application-header { padding: 0 10px; }.brand { font-size: 18px; }.assistant-toggle { padding-right: 7px; }.assistant-toggle > span:first-child { display: none; } }
+@media (pointer: coarse) { .button, .traditional-results__tab, .field input, .field select, .globe-controls button { min-height: 44px; }.globe-controls button { width: 44px; height: 44px; }.globe-controls .center-control { width: auto; padding: 0 12px; } }
 @media (prefers-reduced-motion: reduce) { .switch-track > span { transition: none; }.assistant-panel, .traditional-results { animation: none; } }

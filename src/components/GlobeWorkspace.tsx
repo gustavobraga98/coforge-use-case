@@ -2,22 +2,23 @@ import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react'
 import Globe from 'react-globe.gl'
 import type { TripRoute } from '../data/tripScenario'
 
-function getDimensions() {
+function getDimensions(compact: boolean) {
   const narrow = window.innerWidth <= 650
   return {
-    width: narrow ? window.innerWidth : Math.min(window.innerWidth, 1150),
-    height: narrow ? 400 : Math.max(720, window.innerHeight - 72),
+    width: compact ? Math.min(window.innerWidth, 320) : narrow ? window.innerWidth : Math.min(window.innerWidth, 1150),
+    height: compact ? narrow ? 220 : 300 : narrow ? 400 : Math.max(720, window.innerHeight - 72),
   }
 }
 
 type GlobeWorkspaceProps = {
   route: TripRoute
   assistantEnabled: boolean
+  compact?: boolean
 }
 
-export function GlobeWorkspace({ route, assistantEnabled }: GlobeWorkspaceProps) {
+export function GlobeWorkspace({ route, assistantEnabled, compact = false }: GlobeWorkspaceProps) {
   const globeRef = useRef<ComponentRef<typeof Globe> | undefined>(undefined)
-  const [dimensions, setDimensions] = useState(getDimensions)
+  const [dimensions, setDimensions] = useState(() => getDimensions(compact))
   const initialView = useMemo(() => ({
     lat: (route.origin.latitude + route.destination.latitude) / 2,
     lng: (route.origin.longitude + route.destination.longitude) / 2,
@@ -36,10 +37,10 @@ export function GlobeWorkspace({ route, assistantEnabled }: GlobeWorkspaceProps)
   }))
 
   useEffect(() => {
-    const updateDimensions = () => setDimensions(getDimensions())
+    const updateDimensions = () => setDimensions(getDimensions(compact))
     window.addEventListener('resize', updateDimensions)
     return () => window.removeEventListener('resize', updateDimensions)
-  }, [])
+  }, [compact])
 
   useEffect(() => {
     const timer = window.setTimeout(() => globeRef.current?.pointOfView(initialView, 0), 500)
@@ -54,7 +55,7 @@ export function GlobeWorkspace({ route, assistantEnabled }: GlobeWorkspaceProps)
   }
 
   return (
-    <section className={`globe-workspace ${assistantEnabled ? 'globe-workspace--assisted' : ''}`} aria-label={`Interactive globe showing a simulated ${route.origin.city} to ${route.destination.city} route`}>
+    <section className={`globe-workspace ${assistantEnabled ? 'globe-workspace--assisted' : ''}${compact ? ' globe-workspace--compact' : ''}`} aria-label={`Interactive globe showing a simulated ${route.origin.city} to ${route.destination.city} route`}>
       <Globe
         ref={globeRef}
         width={dimensions.width}
@@ -83,7 +84,7 @@ export function GlobeWorkspace({ route, assistantEnabled }: GlobeWorkspaceProps)
         <button type="button" onClick={() => changeZoom('in')} aria-label="Zoom in on globe">+</button>
         <button type="button" onClick={() => changeZoom('out')} aria-label="Zoom out on globe">−</button>
       </div>
-      <p className="globe-instruction">Drag to rotate · Scroll to zoom</p>
+      <p className="globe-instruction">Drag to rotate · Use controls to zoom</p>
     </section>
   )
 }

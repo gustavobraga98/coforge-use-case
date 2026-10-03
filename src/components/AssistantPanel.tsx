@@ -64,19 +64,13 @@ export function AssistantPanel({ scenario }: AssistantPanelProps) {
       </article>
 
       <p className="assistant-panel__planning-status" role="status">
-        <span aria-hidden="true" /> Organizing your plan
+        <span aria-hidden="true" /> Request understood
       </p>
 
-      <div className="assistant-alternatives" role="group" aria-label="Simulated alternative planning areas">
-        <section className="assistant-placeholder" aria-labelledby="flight-alternatives-heading">
-          <h3 id="flight-alternatives-heading">Flight alternatives</h3>
-          <p>Suitable flight alternatives will appear here.</p>
-        </section>
-        <section className="assistant-placeholder" aria-labelledby="stay-alternatives-heading">
-          <h3 id="stay-alternatives-heading">Stay alternatives</h3>
-          <p>Suitable stay alternatives will appear here.</p>
-        </section>
-      </div>
+      <section className="assistant-next-step" aria-labelledby="assistant-next-step-heading">
+        <h3 id="assistant-next-step-heading">Next, compare the trade-offs</h3>
+        <p>Atlas Travel will organize simulated choices around cost, comfort, and arrival time before asking for a decision.</p>
+      </section>
     </section>
   )
 }

@@ -14,7 +14,7 @@ Uma carta de navegação orbital contemporânea transforma a Terra em contexto d
 
 - **Foco:** globo 3D central, manipulável por arrastar e aproximar; a rota São Paulo–Nova York aparece como trajetória simulada sobre geografia real.
 - **Sistema:** superfícies escuras de alta legibilidade, linhas geodésicas luminosas, indicadores técnicos contidos e uma hierarquia nítida entre contexto, plano e ação.
-- **Estrutura:** cabeçalho mínimo; globo e resumo de planejamento na área central; regiões laterais ou inferiores preparadas para ações e, posteriormente, para o chat.
+- **Estrutura:** cabeçalho mínimo; na abertura, globo e resumo de planejamento na área central; ao iniciar a comparação tradicional, a área de decisão recebe a maior largura, com resumo persistente e globo reduzido como contexto. Em celular, a etapa ativa vem antes do mapa contextual.
 - **Transição característica:** a ativação do Assistente IA altera a atmosfera do espaço de trabalho, realça a rota e revela um chat lateral. O estado convencional permanece íntegro e retorna ao ser desativado.
 
 ## Componentes e GenUI

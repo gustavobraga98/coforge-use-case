@@ -106,9 +106,11 @@ The palette uses deep blue-black surfaces, technical cyan, and a sparing warm wa
 
 ## Layout
 
-The desktop workspace uses a three-column field: route context on the left, the globe in the visual center, and planning space on the right. The rails are sized with `clamp()` so the globe remains the anchor on presentation widths. At 850px the right rail moves beneath the left rail; at 650px both rails stack below a 400px-tall globe.
+The opening and assisted workspace use the three-part orbital field: route context, the globe as the visual center, and a compact planning panel. Once the traditional flow reaches results, the composition intentionally changes: the comparison becomes the widest central work area, a compact trip summary stays visible beside it, and the globe becomes a smaller usable route context. This preserves the globe's narrative role without forcing choices into a narrow rail.
 
-**The Globe-First Rule.** Never place a dense data view where it obscures the globe’s route or its direct manipulation controls.
+At intermediate widths, the comparison and summary form a two-column task layout and the compact globe is hidden. At phone widths, the active task appears before the contextual map; the map returns as a short route panel after the task context.
+
+**The Task-First Rule.** The globe introduces the trip; the current decision owns the largest usable area. Never make a dense decision flow compete with the globe or sit below redundant route context.
 
 ## Elevation & Depth
 
@@ -150,11 +152,12 @@ The globe uses local real-world geography, a simulated São Paulo–New York tra
 ### Do:
 
 - **Do** keep geographic rendering real while explicitly labeling routes and planning content as illustrative.
-- **Do** reserve the right rail for evolving planning or assistant content without displacing the globe.
+- **Do** give search and comparison their own central work area once a person starts making choices.
+- **Do** keep cost, policy, and current selection together in a compact persistent summary.
 - **Do** use cyan and amber with intention, preserving contrast on dark surfaces.
 
 ### Don't:
 
 - **Don't** imply bookings, suppliers, map traffic, or travel data are real.
-- **Don't** turn supporting panels into bright competing focal points.
+- **Don't** turn the planning rail into a vertically scrolling page inside a narrow column.
 - **Don't** make the assistant state appear active before T5 implements its behavior.

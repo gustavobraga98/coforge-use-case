@@ -48,6 +48,36 @@ function matchesCanonicalTraditionalSearch(
     && criteria.returnDate === request.returnDate
 }
 
+type TraditionalPlanningStep = 'search' | 'flight' | 'stay' | 'review'
+
+const planningSteps: readonly { id: TraditionalPlanningStep; label: string }[] = [
+  { id: 'search', label: 'Search' },
+  { id: 'flight', label: 'Flight' },
+  { id: 'stay', label: 'Stay' },
+  { id: 'review', label: 'Review' },
+]
+
+function TraditionalPlanningProgress({ currentStep }: { currentStep: TraditionalPlanningStep }) {
+  const currentIndex = planningSteps.findIndex(({ id }) => id === currentStep)
+
+  return (
+    <nav className="planning-progress" aria-label="Traditional planning progress">
+      <ol>
+        {planningSteps.map((step, index) => (
+          <li
+            key={step.id}
+            className={index < currentIndex ? 'planning-progress__step--complete' : index === currentIndex ? 'planning-progress__step--current' : ''}
+            aria-current={index === currentIndex ? 'step' : undefined}
+          >
+            <span aria-hidden="true">{index < currentIndex ? '✓' : index + 1}</span>
+            <strong>{step.label}</strong>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
 export default function App() {
   const [assistantEnabled, setAssistantEnabled] = useState(false)
   const [traditionalSearchCriteria, setTraditionalSearchCriteria] = useState<TraditionalSearchCriteria>(() =>
@@ -64,6 +94,14 @@ export default function App() {
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const route = atlasTravelScenario.request.route
   const isTraditionalSearchActive = traditionalSearchState !== 'form'
+  const isTaskFocused = !assistantEnabled && (traditionalSearchState === 'results' || traditionalConfirmationState !== 'results')
+  const currentPlanningStep: TraditionalPlanningStep = traditionalConfirmationState !== 'results' || selectedHotelId !== null
+    ? 'review'
+    : selectedFlightId !== null
+      ? 'stay'
+      : traditionalSearchState === 'results'
+        ? 'flight'
+        : 'search'
 
   useEffect(() => () => {
     if (searchTimeout.current !== null) {
@@ -94,6 +132,15 @@ export default function App() {
 
       return selectedFlight?.isEligible ? flightId : null
     })
+  }
+
+  function selectTraditionalFlight(flightId: string) {
+    setSelectedFlightId(flightId)
+    setTraditionalResultsTab('stays')
+  }
+
+  function selectTraditionalHotel(hotelId: string) {
+    setSelectedHotelId(hotelId)
   }
 
   function reviewTraditionalPlan() {
@@ -153,12 +200,14 @@ export default function App() {
         </div>
       </header>
 
-      <div className={`workspace ${assistantEnabled ? 'workspace--assisted' : 'workspace--traditional'}`}>
-        <Suspense fallback={<div className="globe-loading" role="status">Loading interactive globe…</div>}>
-          <GlobeWorkspace route={route} assistantEnabled={assistantEnabled} />
-        </Suspense>
+      <div className={`workspace ${assistantEnabled ? 'workspace--assisted' : 'workspace--traditional'}${isTaskFocused ? ' workspace--task-focused' : ''}`}>
+        {!isTaskFocused && (
+          <Suspense fallback={<div className="globe-loading" role="status">Loading interactive globe…</div>}>
+            <GlobeWorkspace route={route} assistantEnabled={assistantEnabled} />
+          </Suspense>
+        )}
 
-        <Surface as="aside" className="planning-rail planning-rail--left" label="Route overview">
+        {!isTaskFocused && <Surface as="aside" className="planning-rail planning-rail--left" label="Route overview">
           <div className="rail-heading">
             <h1>Route overview</h1>
             <Badge>Simulated route</Badge>
@@ -181,21 +230,22 @@ export default function App() {
               <strong>{route.destination.city}</strong>
             </Card>
           </div>
-        </Surface>
+        </Surface>}
 
-        <Surface as="aside" className="planning-rail planning-rail--right" label="Planning panels">
-          <TripContextSummary
-            scenario={atlasTravelScenario}
-            status={assistantEnabled
-              ? 'planning'
-              : traditionalConfirmationState === 'confirmed'
-                ? 'confirmed'
-                : traditionalConfirmationState === 'review'
-                  ? 'readyToBook'
-                  : isTraditionalSearchActive
-                    ? 'planning'
-                    : atlasTravelScenario.initialTripState.status}
-          />
+        <Surface as="aside" className="planning-rail planning-rail--right" label="Planning workspace">
+          {!isTaskFocused && <TripContextSummary
+              scenario={atlasTravelScenario}
+              status={assistantEnabled
+                ? 'planning'
+                : traditionalConfirmationState === 'confirmed'
+                  ? 'confirmed'
+                  : traditionalConfirmationState === 'review'
+                    ? 'readyToBook'
+                    : isTraditionalSearchActive
+                      ? 'planning'
+                      : atlasTravelScenario.initialTripState.status}
+            />}
+          {isTaskFocused && <TraditionalPlanningProgress currentStep={currentPlanningStep} />}
           {assistantEnabled ? (
             <AssistantPanel scenario={atlasTravelScenario} />
           ) : traditionalConfirmationState === 'review' ? (
@@ -229,8 +279,8 @@ export default function App() {
               hasMatchingScenario={matchesCanonicalTraditionalSearch(traditionalSearchCriteria)}
               onFiltersChange={updateTraditionalFlightFilters}
               onActiveTabChange={setTraditionalResultsTab}
-              onFlightSelect={setSelectedFlightId}
-              onHotelSelect={setSelectedHotelId}
+              onFlightSelect={selectTraditionalFlight}
+              onHotelSelect={selectTraditionalHotel}
               onModifySearch={() => setTraditionalSearchState('form')}
               onResetSearch={restoreCanonicalTraditionalSearch}
               onReviewPlan={reviewTraditionalPlan}
@@ -245,6 +295,26 @@ export default function App() {
             />
           )}
         </Surface>
+
+        {isTaskFocused && (
+          <Surface as="aside" className="planning-rail planning-rail--summary" label="Current plan summary">
+            <TripContextSummary
+              compact
+              scenario={atlasTravelScenario}
+              status={traditionalConfirmationState === 'confirmed'
+                ? 'confirmed'
+                : traditionalConfirmationState === 'review'
+                  ? 'readyToBook'
+                  : 'planning'}
+            />
+          </Surface>
+        )}
+
+        {isTaskFocused && (
+          <Suspense fallback={<div className="globe-loading" role="status">Loading route map…</div>}>
+            <GlobeWorkspace route={route} assistantEnabled={assistantEnabled} compact />
+          </Suspense>
+        )}
       </div>
     </main>
   )

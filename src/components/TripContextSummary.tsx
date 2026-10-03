@@ -6,6 +6,7 @@ export type TripContextStatus = TripScenario['initialTripState']['status'] | 'co
 type TripContextSummaryProps = {
   scenario: TripScenario
   status?: TripContextStatus
+  compact?: boolean
 }
 
 const statusLabels: Record<TripContextStatus, string> = {
@@ -47,16 +48,20 @@ function formatDateRange(departureDate: string, returnDate: string) {
     : `${formatDate(departureDate)}–${formatDate(returnDate)}`
 }
 
-export function TripContextSummary({ scenario, status = scenario.initialTripState.status }: TripContextSummaryProps) {
+export function TripContextSummary({
+  scenario,
+  status = scenario.initialTripState.status,
+  compact = false,
+}: TripContextSummaryProps) {
   const { traveler, request, agenda, budget } = scenario
   const primaryCommitment = agenda[0]
 
   return (
-    <section className="trip-context" aria-labelledby="trip-context-heading">
+    <section className={`trip-context${compact ? ' trip-context--compact' : ''}`} aria-labelledby="trip-context-heading">
       <div className="trip-context__heading">
         <div>
-          <h2 id="trip-context-heading">Trip context</h2>
-          <p>Planning request for {traveler.firstName}</p>
+          <h2 id="trip-context-heading">{compact ? 'Plan at a glance' : 'Trip context'}</h2>
+          <p>{compact ? `${traveler.firstName}'s simulated trip` : `Planning request for ${traveler.firstName}`}</p>
         </div>
         <Badge tone="muted">Fictional scenario</Badge>
       </div>
@@ -78,20 +83,24 @@ export function TripContextSummary({ scenario, status = scenario.initialTripStat
           <dt>Dates</dt>
           <dd>{formatDateRange(request.departureDate, request.returnDate)}</dd>
         </div>
-        {primaryCommitment && (
+        {!compact && primaryCommitment && (
           <div>
             <dt>Key commitment</dt>
             <dd>{primaryCommitment.title} · {timeFormatter.format(new Date(primaryCommitment.startsAt))}</dd>
           </div>
         )}
-        <div>
-          <dt>Arrival</dt>
-          <dd>Before {timeFormatter.format(new Date(request.arriveBefore))} on {formatDate(request.departureDate)}</dd>
-        </div>
-        <div>
-          <dt>Preference</dt>
-          <dd>{request.directFlightsPreferred ? 'Direct flight preferred' : 'Flight preference not specified'}</dd>
-        </div>
+        {!compact && (
+          <div>
+            <dt>Arrival</dt>
+            <dd>Before {timeFormatter.format(new Date(request.arriveBefore))} on {formatDate(request.departureDate)}</dd>
+          </div>
+        )}
+        {!compact && (
+          <div>
+            <dt>Preference</dt>
+            <dd>{request.directFlightsPreferred ? 'Direct flight preferred' : 'Flight preference not specified'}</dd>
+          </div>
+        )}
         <div>
           <dt>Budget limit</dt>
           <dd>{budgetFormatter.format(budget.limit)}</dd>

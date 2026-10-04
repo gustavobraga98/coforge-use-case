@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { AssistantPanel } from './components/AssistantPanel'
+import { AssistantPanel, type AssistantChatMessage } from './components/AssistantPanel'
 import {
   TraditionalSearchForm,
   type TraditionalSearchCriteria,
@@ -80,6 +80,7 @@ function TraditionalPlanningProgress({ currentStep }: { currentStep: Traditional
 
 export default function App() {
   const [assistantEnabled, setAssistantEnabled] = useState(false)
+  const [assistantMessages, setAssistantMessages] = useState<AssistantChatMessage[]>([])
   const [traditionalSearchCriteria, setTraditionalSearchCriteria] = useState<TraditionalSearchCriteria>(() =>
     createInitialTraditionalSearchCriteria(),
   )
@@ -247,7 +248,11 @@ export default function App() {
             />}
           {isTaskFocused && <TraditionalPlanningProgress currentStep={currentPlanningStep} />}
           {assistantEnabled ? (
-            <AssistantPanel scenario={atlasTravelScenario} />
+            <AssistantPanel
+              scenario={atlasTravelScenario}
+              messages={assistantMessages}
+              onMessagesChange={setAssistantMessages}
+            />
           ) : traditionalConfirmationState === 'review' ? (
             <TraditionalPlanConfirmation
               scenario={atlasTravelScenario}

@@ -22,7 +22,13 @@ def create_app(interpreter: Interpreter | None = None) -> FastAPI:
         try:
             return await interpret(payload.messages)
         except LocalModelError as error:
-            logger.info("Local model interpretation failed: %s", error)
+            cause = error.__cause__
+            logger.error(
+                "Local model interpretation failed (%s): %s",
+                type(cause).__name__ if cause is not None else "unknown error",
+                cause,
+                exc_info=error,
+            )
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail={

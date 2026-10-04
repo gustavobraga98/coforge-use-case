@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import httpx
 import pytest
 from pydantic_ai import PromptedOutput, UnexpectedModelBehavior
+from pydantic_ai.profiles.openai import OpenAIModelProfile
 
 from backend.assistant import (
     LOCAL_MODEL_TIMEOUT_SECONDS,
@@ -92,6 +93,10 @@ def test_interpreter_uses_prompted_json_output_with_a_ninety_second_timeout() ->
 
     assert isinstance(interpreter._agent.output_type, PromptedOutput)
     assert interpreter._agent.output_type.outputs is TripConstraints
+    profile = OpenAIModelProfile.from_profile(interpreter._agent.model.profile)
+
+    assert not profile.supports_json_object_output
+    assert not profile.openai_chat_supports_multiple_system_messages
     assert LOCAL_MODEL_TIMEOUT_SECONDS == 90
 
 

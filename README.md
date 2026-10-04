@@ -33,7 +33,7 @@ These optional environment variables configure the backend:
 
 ```bash
 export LM_STUDIO_BASE_URL=http://127.0.0.1:1234/v1
-export LM_STUDIO_MODEL=qwen3.6-35b-a3b@q4_k_s
+export LM_STUDIO_MODEL=qwen/qwen3.5-9b
 ```
 
 `LM_STUDIO_API_KEY` is optional and is only needed if local authentication was enabled in LM Studio.

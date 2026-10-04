@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from openai import AsyncOpenAI
 from pydantic_ai import Agent, PromptedOutput
 from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.profiles.openai import OpenAIModelProfile
 from pydantic_ai.providers.openai import OpenAIProvider
 
 from .schemas import (
@@ -44,7 +45,7 @@ class LocalModelSettings:
     def from_environment(cls) -> "LocalModelSettings":
         return cls(
             base_url=os.getenv("LM_STUDIO_BASE_URL", "http://127.0.0.1:1234/v1"),
-            model=os.getenv("LM_STUDIO_MODEL", "qwen3.6-35b-a3b@q4_k_s"),
+            model=os.getenv("LM_STUDIO_MODEL", "qwen/qwen3.5-9b"),
             api_key=os.getenv("LM_STUDIO_API_KEY", "lm-studio"),
         )
 
@@ -90,6 +91,10 @@ class TravelInterpreter:
         model = OpenAIChatModel(
             resolved_settings.model,
             provider=OpenAIProvider(openai_client=client),
+            profile=OpenAIModelProfile(
+                supports_json_object_output=False,
+                openai_chat_supports_multiple_system_messages=False,
+            ),
         )
         self._agent = Agent(
             model,

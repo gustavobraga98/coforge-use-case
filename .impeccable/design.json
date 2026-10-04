@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-02T11:01:36-03:00",
+  "generatedAt": "2026-10-04T00:00:00-03:00",
   "title": "Design System: Atlas Travel",
   "extensions": {
     "colorMeta": {
@@ -16,9 +16,11 @@
     "shadows": [],
     "motion": [
       { "name": "globe-camera", "value": "450ms", "purpose": "Smooth camera changes initiated by globe controls." },
-      { "name": "assistant-panel-enter", "value": "260ms ease-out", "purpose": "A restrained entrance for the assisted planning narrative, disabled when reduced motion is preferred." }
+      { "name": "assistant-workspace-activation", "value": "720ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "A one-shot cyan workspace scan and orbital pulse when AI Assistant is activated; removed for reduced motion." },
+      { "name": "assistant-rail-arrival", "value": "460–520ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Brief rail movement that explains the assisted workspace composition without delaying interaction." }
     ],
     "breakpoints": [
+      { "name": "assistant-stack", "value": "1120px" },
       { "name": "rail-stack", "value": "850px" },
       { "name": "mobile", "value": "650px" }
     ]
@@ -60,20 +62,20 @@
       "name": "Assistant Conversation",
       "kind": "custom",
       "refersTo": "assistant-panel",
-      "description": "A compact, informational conversation state for organizing a fictional travel request.",
-      "html": "<section class=\"ds-assistant\"><span class=\"ds-author\">GUSTAVO</span><p>Plan a trip from São Paulo to New York.</p><div class=\"ds-status\"><i></i> Organizing your plan</div></section>",
-      "css": ".ds-assistant { padding: 12px; border: 1px solid #2c6175; border-radius: 9px; background: #0b2332; color: #e3f0f3; font: 400 12px/1.55 'Space Grotesk', sans-serif; } .ds-assistant p { margin: 6px 0 12px; } .ds-author { color: #6de5ed; font-size: 10px; font-weight: 700; letter-spacing: .08em; } .ds-status { display: flex; align-items: center; gap: 8px; color: #78e1e9; font-weight: 600; } .ds-status i { width: 7px; height: 7px; border-radius: 50%; background: #47dbe9; }"
+      "description": "A persistent side-rail conversation with a scrollable feed and an always-reachable composer for organizing a fictional travel request.",
+      "html": "<section class=\"ds-assistant\"><div class=\"ds-message\"><span class=\"ds-author\">GUSTAVO</span><p>Plan a trip from São Paulo to New York.</p></div><form class=\"ds-composer\"><label>Your message</label><textarea placeholder=\"Describe a fictional trip\"></textarea><button>Send</button></form></section>",
+      "css": ".ds-assistant { display: flex; flex-direction: column; gap: 12px; min-height: 360px; padding: 12px; border: 1px solid #1b3547; border-radius: 12px; background: #071522; color: #e3f0f3; font: 400 12px/1.55 'Space Grotesk', sans-serif; } .ds-message { flex: 1; padding: 12px; border: 1px solid #2c6175; border-radius: 9px; background: #0b2332; } .ds-message p { margin: 6px 0 0; } .ds-author, .ds-composer label { color: #6de5ed; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; } .ds-composer { display: grid; gap: 7px; } .ds-composer textarea { min-height: 64px; border: 1px solid #294a5f; border-radius: 7px; padding: 9px; background: #061521; color: #e8f2f5; } .ds-composer button { justify-self: end; border: 1px solid #47dbe9; border-radius: 9px; padding: 8px 12px; background: #47dbe9; color: #03121a; font-weight: 700; } .ds-composer button:focus-visible { outline: 3px solid #2457d6; outline-offset: 3px; }"
     }
   ],
   "narrative": {
     "northStar": "The Orbital Operations Deck",
-    "overview": "Atlas Travel frames travel planning as a calm, high-confidence operations surface. Near-black space, local satellite geography, and restrained cyan trajectory lines make the physical route tangible without presenting a real booking system. The visual drama belongs to the interactive Earth. Surrounding information remains compact, factual, and visibly provisional so later traditional and AI-assisted flows can occupy the same shell.",
+    "overview": "Atlas Travel frames travel planning as a calm, high-confidence operations surface. Near-black space, local satellite geography, and restrained cyan trajectory lines make the physical route tangible without presenting a real booking system. The visual drama belongs to the interactive Earth. In AI Assistant mode, the route context stays compact at left, the globe remains visually open, and a persistent right-side conversation rail owns the full available workspace height.",
     "keyCharacteristics": ["A real-geography 3D globe is the primary workspace object.", "Cyan signals active spatial context; amber marks route endpoints.", "Dense but quiet panels support, rather than compete with, the globe."],
     "rules": [
       { "name": "The Sparse Signal Rule", "body": "Cyan is an operational signal, not a decorative fill; reserve it for the route, interactive controls, and essential status.", "section": "colors" },
-      { "name": "The Globe-First Rule", "body": "Never place a dense data view where it obscures the globe’s route or its direct manipulation controls.", "section": "layout" }
+      { "name": "The Task-First Rule", "body": "The globe introduces the trip; the current decision owns the largest usable area. Never make a dense decision flow compete with the globe or sit below redundant route context.", "section": "layout" }
     ],
-    "dos": ["Do keep geographic rendering real while explicitly labeling routes and planning content as illustrative.", "Do reserve the right rail for evolving planning or assistant content without displacing the globe.", "Do use cyan and amber with intention, preserving contrast on dark surfaces."],
-    "donts": ["Don't imply bookings, suppliers, map traffic, or travel data are real.", "Don't turn supporting panels into bright competing focal points.", "Don't make the assistant state appear active before T5 implements its behavior."]
+    "dos": ["Do keep geographic rendering real while explicitly labeling routes and planning content as illustrative.", "Do keep the assisted chat header and composer reachable while its feed scrolls internally.", "Do use cyan and amber with intention, preserving contrast on dark surfaces."],
+    "donts": ["Don't imply bookings, suppliers, map traffic, or travel data are real.", "Don't turn supporting panels into bright competing focal points.", "Don't make motion required to understand or operate the assisted workspace."]
   }
 }

@@ -80,6 +80,7 @@ function TraditionalPlanningProgress({ currentStep }: { currentStep: Traditional
 
 export default function App() {
   const [assistantEnabled, setAssistantEnabled] = useState(false)
+  const [assistantActivation, setAssistantActivation] = useState(0)
   const [assistantMessages, setAssistantMessages] = useState<AssistantChatMessage[]>([])
   const [traditionalSearchCriteria, setTraditionalSearchCriteria] = useState<TraditionalSearchCriteria>(() =>
     createInitialTraditionalSearchCriteria(),
@@ -177,6 +178,14 @@ export default function App() {
     setTraditionalSearchState('form')
   }
 
+  function toggleAssistant() {
+    if (!assistantEnabled) {
+      setAssistantActivation((activation) => activation + 1)
+    }
+
+    setAssistantEnabled(!assistantEnabled)
+  }
+
   return (
     <main className={`application-shell ${assistantEnabled ? 'application-shell--assisted' : 'application-shell--traditional'}`} id="workspace">
       <header className="application-header">
@@ -192,7 +201,7 @@ export default function App() {
             type="button"
             aria-label={`AI Assistant ${assistantEnabled ? 'on' : 'off'}`}
             aria-pressed={assistantEnabled}
-            onClick={() => setAssistantEnabled((enabled) => !enabled)}
+            onClick={toggleAssistant}
           >
             <span>AI Assistant</span>
             <span className="assistant-toggle__state" aria-hidden="true">{assistantEnabled ? 'On' : 'Off'}</span>
@@ -201,7 +210,8 @@ export default function App() {
         </div>
       </header>
 
-      <div className={`workspace ${assistantEnabled ? 'workspace--assisted' : 'workspace--traditional'}${isTaskFocused ? ' workspace--task-focused' : ''}`}>
+      <div className={`workspace ${assistantEnabled ? `workspace--assisted workspace--assistant-activation-${assistantActivation}` : 'workspace--traditional'}${isTaskFocused ? ' workspace--task-focused' : ''}`}>
+        {assistantEnabled && <span className="assistant-activation-scan" aria-hidden="true" />}
         {!isTaskFocused && (
           <Suspense fallback={<div className="globe-loading" role="status">Loading interactive globe…</div>}>
             <GlobeWorkspace route={route} assistantEnabled={assistantEnabled} />
@@ -217,6 +227,11 @@ export default function App() {
             <RouteMapPreview route={route} />
             <p className="map-caption">{route.origin.city} <span>→</span> {route.destination.city}</p>
           </Card>
+          {assistantEnabled && <TripContextSummary
+            compact
+            scenario={atlasTravelScenario}
+            status="planning"
+          />}
           <div className="itinerary-preview" role="group" aria-label="Simulated itinerary preview">
             <div className="itinerary-line" aria-hidden="true" />
             <Card className="itinerary-stop" label="Origin">
@@ -233,8 +248,8 @@ export default function App() {
           </div>
         </Surface>}
 
-        <Surface as="aside" className="planning-rail planning-rail--right" label="Planning workspace">
-          {!isTaskFocused && <TripContextSummary
+        <Surface as="aside" className="planning-rail planning-rail--right" label={assistantEnabled ? 'AI Assistant workspace' : 'Planning workspace'}>
+          {!isTaskFocused && !assistantEnabled && <TripContextSummary
               scenario={atlasTravelScenario}
               status={assistantEnabled
                 ? 'planning'

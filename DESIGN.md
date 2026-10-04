@@ -106,15 +106,19 @@ The palette uses deep blue-black surfaces, technical cyan, and a sparing warm wa
 
 ## Layout
 
-The opening and assisted workspace use the three-part orbital field: route context, the globe as the visual center, and a compact planning panel. Once the traditional flow reaches results, the composition intentionally changes: the comparison becomes the widest central work area, a compact trip summary stays visible beside it, and the globe becomes a smaller usable route context. This preserves the globe's narrative role without forcing choices into a narrow rail.
+The opening workspace uses the three-part orbital field: route context, the globe as the visual center, and a compact planning panel. The assisted workspace turns that field into a dedicated operational composition: the route mini-map, itinerary, and compact trip status share the left rail; the globe stays visually open in the center; and the persistent chat occupies the full available height of the right rail below the header. The chat header and composer remain reachable while its message feed scrolls internally. Once the traditional flow reaches results, the composition intentionally changes: the comparison becomes the widest central work area, a compact trip summary stays visible beside it, and the globe becomes a smaller usable route context. This preserves the globe's narrative role without forcing choices into a narrow rail.
 
-At intermediate widths, the comparison and summary form a two-column task layout and the compact globe is hidden. At phone widths, the active task appears before the contextual map; the map returns as a short route panel after the task context.
+At intermediate widths and on phones, the assisted chat appears before the route context and compact globe. The traditional comparison and summary form a two-column task layout at intermediate widths; at phone widths, the active task appears before the contextual map, which returns as a short route panel after the task context.
 
 **The Task-First Rule.** The globe introduces the trip; the current decision owns the largest usable area. Never make a dense decision flow compete with the globe or sit below redundant route context.
 
 ## Elevation & Depth
 
 Depth comes from tonal layers, 1px cool borders, satellite imagery, and the WebGL atmosphere rather than card shadows. The globe can carry the only broad atmospheric glow because it represents the spatial workspace, not a generic container.
+
+## Motion
+
+Activating AI Assistant earns one short orbital transition: the two rails settle into their new positions, a cyan scan crosses the workspace, and the globe receives a bounded atmospheric pulse. The effect runs on each activation, stays under a second, and never blocks interaction. `prefers-reduced-motion` removes travel, scan, and pulse while preserving the final assisted layout.
 
 ## Shapes
 

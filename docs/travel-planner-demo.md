@@ -28,6 +28,8 @@ Com o assistente desligado, a demonstração apresenta uma experiência tradicio
 
 Com o assistente ligado, a mesma pessoa pode descrever a necessidade em linguagem natural. O assistente usa as informações e ações já disponíveis para organizar alternativas, pedir escolhas relevantes e acompanhar a conclusão do plano.
 
+No modo assistido, a área de trabalho passa a ser uma composição própria: o contexto compacto da rota fica na rail esquerda, o globo permanece como foco visual central e o chat ocupa uma rail persistente à direita por toda a altura disponível abaixo do cabeçalho. A ativação faz uma transição breve que torna essa reorganização perceptível; em preferências de movimento reduzido, a composição muda sem deslocamentos ou pulsos.
+
 O contraste é intencional: a IA não substitui a plataforma nem elimina os controles tradicionais. Ela torna as capacidades existentes mais acessíveis, coordenadas e contextuais. Os controles usuais continuam disponíveis para que a pessoa escolha como deseja interagir.
 
 ### Sequência de apresentação

@@ -39,6 +39,10 @@ O contraste é intencional: a IA não substitui a plataforma nem elimina os cont
 3. Repetir o mesmo objetivo com uma solicitação natural.
 4. Mostrar como a plataforma organiza opções, apoia decisões e conduz a confirmação, preservando os mesmos dados e regras do modo tradicional.
 
+## Cenários de demonstração
+
+O mock começa sem uma viagem pré-configurada. A busca tradicional oferece uma lista curada de 20 cidades de demonstração para origem e destino. Cada combinação gera, de modo determinístico na sessão, um cenário fictício coerente de período, compromisso, orçamento, voos e hospedagem. A seleção não consulta disponibilidade externa.
+
 ## Cenário principal
 
 A demonstração começa com um pedido natural, como:
@@ -91,6 +95,8 @@ A pessoa vê o motivo, o valor e as alternativas antes de avançar.
 
 Depois de uma escolha, o itinerário, o orçamento e os próximos passos se atualizam. A pessoa deve sentir que está colaborando com a plataforma, e não esperando por uma resposta estática.
 
+As escolhas nos widgets retornam ao agente automaticamente. Confirmar o calendário comunica as datas completas; selecionar voo ou hospedagem atualiza os custos compartilhados com o modo tradicional. Datas numéricas ambíguas continuam pendentes até essa decisão. A revisão final exige um clique explícito e permanece inteiramente simulada.
+
 ## Jornada demonstrada
 
 1. A pessoa descreve a necessidade da viagem.
@@ -112,6 +118,7 @@ Esse segundo momento reforça que a plataforma não serve apenas para pesquisar 
 ## Limites do mock
 
 - Todos os nomes, valores, itinerários, políticas e reservas serão fictícios.
+- A única integração externa permitida é Geoapify, usada exclusivamente para geocodificar localidades e renderizar o mapa. A geografia é real; planejamento, preços, políticas e confirmação seguem fictícios.
 - Nenhuma integração real, compra, reserva ou comunicação externa será realizada.
 - A demonstração não reproduz telas, dados, regras ou fluxos de qualquer cliente.
 - O foco é a experiência e o potencial de aplicação em diferentes plataformas, não o funcionamento de uma operação de viagens real.

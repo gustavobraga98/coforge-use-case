@@ -11,6 +11,7 @@ from backend.assistant import (
     LOCAL_MODEL_TIMEOUT_SECONDS,
     LocalModelError,
     TravelInterpreter,
+    apply_arrival_time_fallback,
     create_interpretation,
 )
 from backend.main import create_app
@@ -48,6 +49,13 @@ def test_partial_interpretation_requests_the_missing_details() -> None:
         "directFlightPreference",
         "budget",
     ]
+
+
+@pytest.mark.parametrize("message", ["before 6pm", "antes das 18:00"])
+def test_arrival_time_fallback_keeps_explicit_english_and_portuguese_times(message: str) -> None:
+    constraints = TripConstraints(departure_date=date(2026, 4, 10))
+    resolved = apply_arrival_time_fallback(constraints, [ChatMessage(role="user", content=message)])
+    assert resolved.arrive_before == datetime.fromisoformat("2026-04-10T18:00:00+00:00")
 
 
 def test_endpoint_returns_a_typed_interpretation() -> None:

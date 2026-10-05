@@ -9,12 +9,12 @@ O mock estará concluído quando demonstrar, ponta a ponta, que a mesma platafor
 ### 1. Fundar a experiência
 
 - Definir a marca e a interface fictícias do Atlas Travel.
-- Criar dados simulados para Gustavo, voos, hotéis, agenda, orçamento e política corporativa.
+- Criar um catálogo de cenários simulados para Gustavo, com partidas de São Paulo, Rio de Janeiro e Buenos Aires para Nova York, Londres e Cidade do México, cada qual com voos, hotéis, agenda, orçamento e política corporativa.
 - Exibir um controle visível de alternância **Assistente IA**.
 
 ### 2. Construir o modo tradicional
 
-- Disponibilizar busca por origem, destino, datas e filtros.
+- Disponibilizar busca por origem, destino, datas e filtros, permitindo escolher um dos destinos fictícios disponíveis.
 - Permitir comparar opções de voo e hotel.
 - Mostrar resumo de custos, alertas de política/orçamento e confirmação simulada.
 
@@ -44,11 +44,19 @@ O mock estará concluído quando demonstrar, ponta a ponta, que a mesma platafor
 
 ## Direção técnica de evolução
 
-Depois que o fluxo manual estiver estabelecido, o mock evoluirá a interface web React existente com um backend local em Python/FastAPI e um agente PydanticAI. O CopilotKit conectará a conversa e as ações do agente aos componentes React registrados como GenUI, que continuarão recebendo dados tipados e estruturados. Essa evolução deve demonstrar coordenação entre agente e interface sem permitir geração de HTML ou JSX arbitrário e sem introduzir integrações, reservas ou dados reais.
+Depois que o fluxo manual estiver estabelecido, o mock evoluirá a interface web React existente com MapLibre GL JS e um backend local em Python/FastAPI. Geoapify será a única integração externa, limitada à geocodificação de localidades e aos tiles do mapa; a chave fica no ambiente local e deve ser restringida por origem no provedor. O agente PydanticAI será exposto por AG-UI diretamente pelo FastAPI e consumido pela SPA Vite. Ele chamará as mesmas capacidades do plano legado e atualizará componentes React registrados como GenUI tipada; a confirmação simulada continua uma decisão humana explícita. A geografia pode ser real; planejamento, preços, políticas, seleções e confirmação permanecem inteiramente fictícios. Nenhum agente gera HTML ou JSX arbitrário.
 
 ## Critérios de aceite
 
+- Widgets de calendário, comparação e revisão são decisões humanas vinculadas a chamadas AG-UI. O clique grava o resultado estruturado, atualiza o plano comum aos modos e retoma o agente automaticamente.
+- Datas, filtros, seleções, orçamento e confirmação têm uma fonte de estado na sessão React; custos e política são calculados pelas mesmas funções do fluxo tradicional.
+- Mudanças invalidam a revisão anterior. Falhas do modelo preservam as escolhas e permitem repetir a resposta sem reaplicar a confirmação.
+- O histórico do protocolo preserva mensagens `assistant.toolCalls` e `tool.toolCallId`; o histórico visual exibe cada widget junto à mensagem correspondente. Conteúdo de raciocínio não é exibido.
+- A interface apresenta datas em `DD/MM/YYYY`. O calendário recebe valores ISO internamente e vem pré-preenchido para datas numéricas no padrão local ou informadas por extenso.
+- Verificação automatizada inclui componentes React, motor de plano e ciclo real de serialização/deserialização AG-UI com modelo de teste local. O modelo LM Studio é verificado separadamente por smoke test.
+
 - A apresentação permite executar o fluxo manual e repetir o mesmo objetivo via IA.
+- A tela inicial não traz uma viagem pronta; a pessoa pode escolher São Paulo, Rio de Janeiro ou Buenos Aires como origem e Nova York, Londres ou Cidade do México como destino no modo tradicional, e a rota, o contexto, as opções e os valores exibidos acompanham o cenário selecionado.
 - A IA coordena capacidades existentes da plataforma, sem parecer substituí-la.
 - Cada escolha relevante apresenta contexto, comparação e consequência financeira ou de política.
 - Reservas, dados e aprovações são explicitamente fictícios e simulados.

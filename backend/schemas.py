@@ -64,6 +64,36 @@ class InterpretationStatus(StrEnum):
     NEEDS_CLARIFICATION = "needs_clarification"
 
 
+class GeocodingStatus(StrEnum):
+    RESOLVED = "resolved"
+    NOT_FOUND = "not_found"
+    AMBIGUOUS = "ambiguous"
+
+
+class GeocodedLocation(ApiModel):
+    query: str
+    status: GeocodingStatus
+    label: str | None = None
+    country: str | None = None
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+    time_zone: str | None = None
+
+
+class GeocodeRequest(ApiModel):
+    query: str = Field(min_length=2, max_length=160)
+
+
+class MapConfiguration(ApiModel):
+    style_url: str | None = None
+    available: bool
+
+class AssistantTurn(ApiModel):
+    interpretation: "InterpretResponse"
+    origin: GeocodedLocation | None = None
+    destination: GeocodedLocation | None = None
+
+
 class InterpretRequest(ApiModel):
     messages: list[ChatMessage] = Field(min_length=1, max_length=20)
 

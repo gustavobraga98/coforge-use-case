@@ -1,21 +1,31 @@
-# T6 — Criar a narrativa inicial do assistente
+# T6 — Jornada conversacional e widgets GenUI
 
 ## Objetivo
 
-Estabelecer o primeiro momento da experiência assistida por meio de uma conversa local, interpretando o pedido da pessoa sem executar pesquisa ou reserva.
+Estabelecer uma jornada conversacional local via PydanticAI e AG-UI no FastAPI, coordenando apenas dados e decisões fictícios do plano.
 
 ## Escopo
 
 - Disponibilizar um chat para que a pessoa escreva o pedido inicial de planejamento.
 - Exibir o pedido canônico de Gustavo como sugestão clicável, sem enviá-lo automaticamente.
 - Criar um endpoint local em FastAPI com um agente PydanticAI para extrair as restrições do pedido em uma estrutura tipada.
-- Configurar o agente para usar o endpoint compatível com OpenAI do LM Studio. Em desenvolvimento e testes locais, usar o modelo `qwen3.6-35b-a3b@q4_k_s`.
+- Configurar o agente para usar o endpoint compatível com OpenAI do LM Studio. Em desenvolvimento e testes locais, usar o modelo `qwen/qwen3.5-9b`.
 - Manter a URL do endpoint e o nome do modelo configuráveis por variáveis de ambiente, sem credenciais ou serviços externos.
 - Validar a resposta do agente contra um esquema estruturado antes de apresentá-la na interface.
 - Manter o histórico apenas na sessão atual para que mensagens posteriores possam ajustar as restrições já reconhecidas.
 - Exibir uma resposta inicial que organize visualmente as restrições reconhecidas a partir dos dados estruturados.
 - Indicar que o plano está sendo organizado.
 - Preparar as áreas que receberão alternativas nas próximas etapas.
+- Expor o agente em `/api/assistant/ag-ui` por `AGUIAdapter.dispatch_request` e manter `/api/assistant/interpret` compatível.
+- Consumir o stream AG-UI diretamente do FastAPI; manter componentes GenUI tipados com Zod sem um processo Node adicional.
+- Espelhar rota, período, filtros, seleções, custo e confirmação entre chat e workspace; confirmação simulada exige decisão humana explícita.
+- Padronizar todas as datas visíveis em `DD/MM/YYYY`. Datas numéricas seguem essa leitura; datas em português ou inglês por extenso preenchem o calendário com o valor ISO correspondente para aprovação ou edição.
+- Ampliação de escopo aprovada: calendário, seleção de voo/hospedagem, custos, revisão e confirmação simulada também são operáveis no chat.
+- Registrar ferramentas frontend no payload AG-UI, preservar chamadas e resultados no histórico de protocolo e retomar automaticamente após cada decisão humana.
+- Usar um motor compartilhado de plano para ambos os modos, com preços canônicos e invalidação de seleções/revisão quando o período muda.
+- Permitir editar escolhas anteriores e repetir uma resposta interrompida sem perder a decisão já aplicada.
+- Limitar as ferramentas AG-UI oferecidas em cada turno à próxima etapa elegível (`rota → datas → voo → hospedagem → revisão → confirmação`), para que o modelo não possa saltar etapas ou atualizar preços e seleções fora do motor local.
+- Preservar um retrato do plano em cada widget histórico; alterações posteriores não podem reescrever uma comparação ou custo já exibido.
 
 ## Critérios de aceite
 
@@ -26,10 +36,15 @@ Estabelecer o primeiro momento da experiência assistida por meio de uma convers
 - Pedidos parciais apresentam as restrições identificadas e solicitam objetivamente as informações que faltam.
 - A interface indica que o plano está sendo organizado e prepara as áreas de alternativas.
 - Não há alegação de consulta, reserva ou integração real.
+- Confirmar o calendário envia datas ISO e `datesConfirmed` em uma mensagem `tool` vinculada ao `toolCallId`; não exige digitar “Done!”.
+- Datas ambíguas não recebem ordem ou ano presumidos. Os campos exigem datas completas e retorno posterior à partida.
+- O agente recebe estado atualizado e avança de calendário para voo, hospedagem, custos e revisão sem repetir decisões resolvidas.
+- Texto isolado não confirma a simulação; o botão de revisão exige plano elegível e revisão atual.
+- Testes de componentes exercitam cliques e os payloads seguintes; testes do endpoint verificam descoberta e retomada de ferramentas via SSE.
 
 ## Fora de escopo
 
-Escolha de opções, solicitação de aprovação, confirmação de reserva, consultas externas, persistência e uso de modelos ou serviços de IA remotos.
+Aprovação de exceções, reserva real, integrações de viagem, persistência e uso de modelos ou serviços de IA remotos. Geocodificação segue o limite já aprovado na visão.
 
 ## Dependências
 

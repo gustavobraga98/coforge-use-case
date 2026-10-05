@@ -1,5 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { AssistantPanel, type AssistantChatMessage } from './components/AssistantPanel'
+import { AssistantPanel } from './components/AssistantPanel'
+import { initialConversation } from './plan/agUiConversation'
+import { useTravelPlan } from './plan/useTravelPlan'
+import { TraditionalPlanCostSummary } from './components/TraditionalPlanCostSummary'
 import {
   TraditionalSearchForm,
   type TraditionalSearchCriteria,
@@ -11,37 +14,44 @@ import {
 import { TraditionalPlanConfirmation } from './components/TraditionalPlanConfirmation'
 import {
   createInitialTraditionalFlightFilters,
-  evaluateTraditionalFlightOptions,
   type TraditionalFlightFilters,
 } from './components/traditionalFlightFilters'
-import { createTraditionalPlanSummary } from './components/traditionalPlanSummary'
 import { Badge, Button, Card, Surface } from './components/ui'
 import { RouteMapPreview } from './components/RouteMapPreview'
 import { TripContextSummary } from './components/TripContextSummary'
-import { atlasTravelScenario } from './data/tripScenario'
+import { atlasTravelScenarios, atlasTravelScenario, createGeneratedTripScenario, type TripScenario } from './data/tripScenario'
 import './styles/app.css'
 
 const GlobeWorkspace = lazy(() =>
   import('./components/GlobeWorkspace').then(({ GlobeWorkspace }) => ({ default: GlobeWorkspace })),
 )
 
-function createInitialTraditionalSearchCriteria(): TraditionalSearchCriteria {
+function createInitialTraditionalSearchCriteria(scenario: TripScenario): TraditionalSearchCriteria {
   return {
-    traveler: atlasTravelScenario.traveler.firstName,
-    origin: atlasTravelScenario.request.route.origin.city,
-    destination: atlasTravelScenario.request.route.destination.city,
-    departureDate: atlasTravelScenario.request.departureDate,
-    returnDate: atlasTravelScenario.request.returnDate,
+    traveler: scenario.traveler.firstName,
+    origin: scenario.request.route.origin.city,
+    destination: scenario.request.route.destination.city,
+    departureDate: scenario.request.departureDate,
+    returnDate: scenario.request.returnDate,
   }
+}
+
+const initialTraditionalCriteria: TraditionalSearchCriteria = {
+  traveler: 'Gustavo',
+  origin: '',
+  destination: '',
+  departureDate: '2026-11-12',
+  returnDate: '2026-11-16',
 }
 
 function matchesCanonicalTraditionalSearch(
   criteria: TraditionalSearchCriteria,
+  scenario: TripScenario,
 ): boolean {
-  const request = atlasTravelScenario.request
+  const request = scenario.request
   const normalizePlace = (value: string) => value.trim().toLocaleLowerCase()
 
-  return criteria.traveler === atlasTravelScenario.traveler.firstName
+  return criteria.traveler === scenario.traveler.firstName
     && normalizePlace(criteria.origin) === normalizePlace(request.route.origin.city)
     && normalizePlace(criteria.destination) === normalizePlace(request.route.destination.city)
     && criteria.departureDate === request.departureDate
@@ -81,20 +91,24 @@ function TraditionalPlanningProgress({ currentStep }: { currentStep: Traditional
 export default function App() {
   const [assistantEnabled, setAssistantEnabled] = useState(false)
   const [assistantActivation, setAssistantActivation] = useState(0)
-  const [assistantMessages, setAssistantMessages] = useState<AssistantChatMessage[]>([])
+  const [conversation, setConversation] = useState(initialConversation)
+  const { plan, dispatch, getPlan } = useTravelPlan()
   const [traditionalSearchCriteria, setTraditionalSearchCriteria] = useState<TraditionalSearchCriteria>(() =>
-    createInitialTraditionalSearchCriteria(),
+    initialTraditionalCriteria,
   )
   const [traditionalSearchState, setTraditionalSearchState] = useState<'form' | 'searching' | 'results'>('form')
-  const [traditionalFlightFilters, setTraditionalFlightFilters] = useState<TraditionalFlightFilters>(() =>
-    createInitialTraditionalFlightFilters(),
-  )
+  const traditionalFlightFilters = plan.filters
   const [traditionalResultsTab, setTraditionalResultsTab] = useState<TraditionalResultsTab>('flights')
-  const [selectedFlightId, setSelectedFlightId] = useState<string | null>(null)
-  const [selectedHotelId, setSelectedHotelId] = useState<string | null>(null)
-  const [traditionalConfirmationState, setTraditionalConfirmationState] = useState<'results' | 'review' | 'confirmed'>('results')
+  const selectedFlightId = plan.selectedFlightId
+  const selectedHotelId = plan.selectedHotelId
+  const traditionalConfirmationState = plan.status === 'planning' ? 'results' : plan.status
+  const setTraditionalConfirmationState = (status: 'results' | 'review' | 'confirmed') => {
+    dispatch(status === 'results' ? { type: 'backToOptions' } : status === 'review' ? { type: 'requestReview' } : { type: 'confirmSimulatedPlan', revision: getPlan().revision })
+  }
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const route = atlasTravelScenario.request.route
+  const scenario = plan.scenario
+  const activeScenario = scenario ?? atlasTravelScenario
+  const route = plan.route
   const isTraditionalSearchActive = traditionalSearchState !== 'form'
   const isTaskFocused = !assistantEnabled && (traditionalSearchState === 'results' || traditionalConfirmationState !== 'results')
   const currentPlanningStep: TraditionalPlanningStep = traditionalConfirmationState !== 'results' || selectedHotelId !== null
@@ -112,9 +126,7 @@ export default function App() {
   }, [])
 
   function searchTraditionalOptions() {
-    setSelectedFlightId(null)
-    setSelectedHotelId(null)
-    setTraditionalConfirmationState('results')
+    updateTraditionalCriteria(traditionalSearchCriteria)
     setTraditionalSearchState('searching')
     searchTimeout.current = setTimeout(() => {
       setTraditionalSearchState('results')
@@ -122,58 +134,59 @@ export default function App() {
     }, 500)
   }
 
+  function updateTraditionalCriteria(nextCriteria: TraditionalSearchCriteria) {
+    setTraditionalSearchCriteria(nextCriteria)
+    if (!nextCriteria.origin || !nextCriteria.destination) {
+      return
+    }
+    dispatch({ type: 'setRoute', route: createGeneratedTripScenario(nextCriteria).request.route })
+    if (nextCriteria.departureDate && nextCriteria.returnDate > nextCriteria.departureDate) {
+      dispatch({ type: 'confirmDates', period: { departureDate: nextCriteria.departureDate, returnDate: nextCriteria.returnDate } })
+    }
+  }
+
   function updateTraditionalFlightFilters(filters: TraditionalFlightFilters) {
-    setTraditionalFlightFilters(filters)
-    setSelectedFlightId((flightId) => {
-      if (flightId === null) {
-        return null
-      }
+    if (!scenario) return
 
-      const selectedFlight = evaluateTraditionalFlightOptions(atlasTravelScenario, filters)
-        .find(({ flight }) => flight.id === flightId)
-
-      return selectedFlight?.isEligible ? flightId : null
-    })
+    dispatch({ type: 'setConstraints', constraints: filters })
   }
 
   function selectTraditionalFlight(flightId: string) {
-    setSelectedFlightId(flightId)
+    dispatch({ type: 'selectFlight', id: flightId })
     setTraditionalResultsTab('stays')
   }
 
   function selectTraditionalHotel(hotelId: string) {
-    setSelectedHotelId(hotelId)
+    dispatch({ type: 'selectHotel', id: hotelId })
   }
 
   function reviewTraditionalPlan() {
-    const summary = createTraditionalPlanSummary(atlasTravelScenario, selectedFlightId, selectedHotelId)
+    if (!scenario) return
 
-    if (summary.state === 'withinPolicy') {
-      setTraditionalConfirmationState('review')
-    }
+    dispatch({ type: 'requestReview' })
   }
 
   function confirmTraditionalPlan() {
-    const summary = createTraditionalPlanSummary(atlasTravelScenario, selectedFlightId, selectedHotelId)
+    if (!scenario) return
 
-    if (summary.state === 'withinPolicy') {
-      setTraditionalConfirmationState('confirmed')
-    }
+    dispatch({ type: 'confirmSimulatedPlan', revision: getPlan().revision })
   }
 
   function restoreCanonicalTraditionalSearch() {
-    setTraditionalSearchCriteria(createInitialTraditionalSearchCriteria())
-    setTraditionalFlightFilters(createInitialTraditionalFlightFilters())
+    if (!scenario) return
+
+    setTraditionalSearchCriteria(createInitialTraditionalSearchCriteria(scenario))
+    dispatch({ type: 'setConstraints', constraints: createInitialTraditionalFlightFilters() })
     setTraditionalResultsTab('flights')
-    setSelectedFlightId(null)
-    setSelectedHotelId(null)
     setTraditionalConfirmationState('results')
     setTraditionalSearchState('form')
   }
 
   function startAnotherTraditionalPlan() {
-    setSelectedFlightId(null)
-    setSelectedHotelId(null)
+    dispatch({ type: 'reset' })
+    setConversation(initialConversation())
+    setTraditionalSearchCriteria(initialTraditionalCriteria)
+    setTraditionalResultsTab('flights')
     setTraditionalConfirmationState('results')
     setTraditionalSearchState('form')
   }
@@ -181,6 +194,11 @@ export default function App() {
   function toggleAssistant() {
     if (!assistantEnabled) {
       setAssistantActivation((activation) => activation + 1)
+    }
+
+    if (assistantEnabled && scenario) {
+      setTraditionalSearchCriteria(createInitialTraditionalSearchCriteria(scenario))
+      setTraditionalSearchState('results')
     }
 
     setAssistantEnabled(!assistantEnabled)
@@ -218,39 +236,40 @@ export default function App() {
           </Suspense>
         )}
 
-        {!isTaskFocused && <Surface as="aside" className="planning-rail planning-rail--left" label="Route overview">
+        {!isTaskFocused && scenario && <Surface as="aside" className="planning-rail planning-rail--left" label="Route overview">
           <div className="rail-heading">
             <h1>Route overview</h1>
             <Badge>Simulated route</Badge>
           </div>
-          <Card className="mini-map-card" label="Map preview of the simulated route">
-            <RouteMapPreview route={route} />
-            <p className="map-caption">{route.origin.city} <span>→</span> {route.destination.city}</p>
+          <Card className="mini-map-card" label="Preview of the illustrative route">
+            <RouteMapPreview route={scenario.request.route} />
+            <p className="map-caption">{scenario.request.route.origin.city} <span>→</span> {scenario.request.route.destination.city}</p>
           </Card>
           {assistantEnabled && <TripContextSummary
             compact
-            scenario={atlasTravelScenario}
-            status="planning"
+            scenario={activeScenario}
+            status={plan.status === 'confirmed' ? 'confirmed' : plan.status === 'review' ? 'readyToBook' : 'planning'}
           />}
           <div className="itinerary-preview" role="group" aria-label="Simulated itinerary preview">
             <div className="itinerary-line" aria-hidden="true" />
             <Card className="itinerary-stop" label="Origin">
               <span className="stop-dot" aria-hidden="true" />
               <span className="stop-caption">Origin</span>
-              <strong>{route.origin.city}</strong>
+              <strong>{scenario.request.route.origin.city}</strong>
             </Card>
             <div className="itinerary-leg"><span aria-hidden="true">↗</span> Simulated route</div>
             <Card className="itinerary-stop" label="Destination">
               <span className="stop-dot" aria-hidden="true" />
               <span className="stop-caption">Destination</span>
-              <strong>{route.destination.city}</strong>
+              <strong>{scenario.request.route.destination.city}</strong>
             </Card>
           </div>
+          {assistantEnabled && <TraditionalPlanCostSummary scenario={scenario} selectedFlightId={selectedFlightId} selectedHotelId={selectedHotelId} />}
         </Surface>}
 
         <Surface as="aside" className="planning-rail planning-rail--right" label={assistantEnabled ? 'AI Assistant workspace' : 'Planning workspace'}>
-          {!isTaskFocused && !assistantEnabled && <TripContextSummary
-              scenario={atlasTravelScenario}
+          {!isTaskFocused && !assistantEnabled && scenario && <TripContextSummary
+              scenario={activeScenario}
               status={assistantEnabled
                 ? 'planning'
                 : traditionalConfirmationState === 'confirmed'
@@ -259,18 +278,14 @@ export default function App() {
                     ? 'readyToBook'
                     : isTraditionalSearchActive
                       ? 'planning'
-                      : atlasTravelScenario.initialTripState.status}
+                    : activeScenario.initialTripState.status}
             />}
           {isTaskFocused && <TraditionalPlanningProgress currentStep={currentPlanningStep} />}
           {assistantEnabled ? (
-            <AssistantPanel
-              scenario={atlasTravelScenario}
-              messages={assistantMessages}
-              onMessagesChange={setAssistantMessages}
-            />
+            <AssistantPanel plan={plan} getPlan={getPlan} dispatch={dispatch} conversation={conversation} onConversationChange={setConversation} />
           ) : traditionalConfirmationState === 'review' ? (
             <TraditionalPlanConfirmation
-              scenario={atlasTravelScenario}
+              scenario={activeScenario}
               selectedFlightId={selectedFlightId}
               selectedHotelId={selectedHotelId}
               state="review"
@@ -280,7 +295,7 @@ export default function App() {
             />
           ) : traditionalConfirmationState === 'confirmed' ? (
             <TraditionalPlanConfirmation
-              scenario={atlasTravelScenario}
+              scenario={activeScenario}
               selectedFlightId={selectedFlightId}
               selectedHotelId={selectedHotelId}
               state="confirmed"
@@ -290,13 +305,13 @@ export default function App() {
             />
           ) : traditionalSearchState === 'results' ? (
             <TraditionalSearchResults
-              scenario={atlasTravelScenario}
+              scenario={activeScenario}
               criteria={traditionalSearchCriteria}
               filters={traditionalFlightFilters}
               activeTab={traditionalResultsTab}
               selectedFlightId={selectedFlightId}
               selectedHotelId={selectedHotelId}
-              hasMatchingScenario={matchesCanonicalTraditionalSearch(traditionalSearchCriteria)}
+              hasMatchingScenario={matchesCanonicalTraditionalSearch(traditionalSearchCriteria, activeScenario)}
               onFiltersChange={updateTraditionalFlightFilters}
               onActiveTabChange={setTraditionalResultsTab}
               onFlightSelect={selectTraditionalFlight}
@@ -307,10 +322,10 @@ export default function App() {
             />
           ) : (
             <TraditionalSearchForm
-              scenario={atlasTravelScenario}
+              scenarios={atlasTravelScenarios}
               criteria={traditionalSearchCriteria}
               isSearching={traditionalSearchState === 'searching'}
-              onCriteriaChange={setTraditionalSearchCriteria}
+              onCriteriaChange={updateTraditionalCriteria}
               onSubmit={searchTraditionalOptions}
             />
           )}
@@ -320,7 +335,7 @@ export default function App() {
           <Surface as="aside" className="planning-rail planning-rail--summary" label="Current plan summary">
             <TripContextSummary
               compact
-              scenario={atlasTravelScenario}
+              scenario={activeScenario}
               status={traditionalConfirmationState === 'confirmed'
                 ? 'confirmed'
                 : traditionalConfirmationState === 'review'

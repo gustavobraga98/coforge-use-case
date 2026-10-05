@@ -253,10 +253,11 @@
 .assistant-genui .button { min-height: 40px; white-space: normal; }
 .assistant-genui .traditional-plan-summary { margin: 0; padding: 0; border: 0; }
 @keyframes assistant-panel-enter { from { opacity: .65; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-.globe-workspace { position: absolute; z-index: 1; top: 0; left: 50%; transform: translateX(-50%); width: min(100vw, 1150px); height: calc(100vh - 72px); min-height: 720px; display: grid; place-items: center; }
-.globe-workspace canvas { display: block; filter: brightness(1.14) saturate(1.08); }
-.globe-workspace--assisted canvas { filter: brightness(1.2) saturate(1.14); }
-.globe-instruction { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); margin: 0; padding: 5px 9px; border-radius: 6px; background: #06121ecb; color: #bbd1da; font-size: 11px; white-space: nowrap; pointer-events: none; }
+.globe-workspace { position: absolute; z-index: 1; top: 0; left: 50%; transform: translateX(-50%); width: min(100vw, 1150px); height: calc(100vh - 72px); min-height: 720px; display: grid; place-items: center; isolation: isolate; }
+.globe-workspace canvas { display: block; filter: brightness(.78) saturate(.84) contrast(.96); }
+.globe-workspace::after { content: ''; position: absolute; z-index: 1; inset: 0; pointer-events: none; background: radial-gradient(circle at center, transparent 24%, #050b1440 64%, #050b14a6 100%); }
+.globe-workspace--assisted canvas { filter: brightness(.84) saturate(.9) contrast(.98); }
+.globe-instruction { position: absolute; z-index: 2; left: 50%; bottom: 20px; transform: translateX(-50%); margin: 0; padding: 5px 9px; border-radius: 6px; background: #06121ecb; color: #bbd1da; font-size: 11px; white-space: nowrap; pointer-events: none; }
 .globe-controls { position: absolute; right: clamp(260px, 25vw, 310px); bottom: 17px; display: flex; gap: 4px; }
 .globe-controls button { width: 30px; height: 30px; border: 1px solid #31546a; border-radius: 6px; background: #071a29e8; color: #e5f5f7; cursor: pointer; font-size: 18px; }
 .globe-controls .center-control { width: auto; padding: 0 8px; font-size: 11px; }
@@ -292,7 +293,7 @@
   overflow: hidden;
   transform: none;
 }
-.globe-workspace--compact canvas { filter: brightness(1.1) saturate(1.02); }
+.globe-workspace--compact canvas { filter: brightness(.82) saturate(.88) contrast(.97); }
 .map-workspace { position: relative; overflow: hidden; background: #071522; }
 .map-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .map-workspace .maplibregl-ctrl-group { border: 1px solid #285064; background: #081a27; box-shadow: none; }

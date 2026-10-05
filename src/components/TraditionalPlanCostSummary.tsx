@@ -1,4 +1,5 @@
 import type { TripScenario } from '../data/tripScenario'
+import { useId } from 'react'
 import { createTraditionalPlanSummary } from './traditionalPlanSummary'
 
 type TraditionalPlanCostSummaryProps = {
@@ -37,6 +38,7 @@ export function TraditionalPlanCostSummary({
   selectedFlightId,
   selectedHotelId,
 }: TraditionalPlanCostSummaryProps) {
+  const headingId = useId()
   const summary = createTraditionalPlanSummary(scenario, selectedFlightId, selectedHotelId)
   const status = statusCopy[summary.state]
   const remainingBudgetLabel = summary.budgetRemainingUsd === null
@@ -46,10 +48,10 @@ export function TraditionalPlanCostSummary({
       : `${currencyFormatter.format(Math.abs(summary.budgetRemainingUsd))} over budget`
 
   return (
-    <section className={`traditional-plan-summary traditional-plan-summary--${summary.state}`} aria-labelledby="traditional-plan-summary-heading">
+    <section className={`traditional-plan-summary traditional-plan-summary--${summary.state}`} aria-labelledby={headingId}>
       <div className="traditional-plan-summary__heading">
         <div>
-          <h3 id="traditional-plan-summary-heading">Cost &amp; policy summary</h3>
+          <h3 id={headingId}>Cost &amp; policy summary</h3>
           <p>Estimated locally from selected simulated options.</p>
         </div>
         <span className="traditional-plan-summary__status" aria-live="polite">{status.label}</span>

@@ -22,12 +22,6 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
 })
 
-const timeFormatter = new Intl.DateTimeFormat('en-US', {
-  hour: 'numeric',
-  minute: '2-digit',
-  timeZone: 'America/New_York',
-})
-
 const budgetFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -46,6 +40,14 @@ function formatDateRange(departureDate: string, returnDate: string) {
   return sameMonth
     ? `${formatDate(departureDate)}–${returnDateValue.getUTCDate()}`
     : `${formatDate(departureDate)}–${formatDate(returnDate)}`
+}
+
+function formatTime(dateTime: string, timeZone: string) {
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone,
+  }).format(new Date(dateTime))
 }
 
 export function TripContextSummary({
@@ -86,13 +88,13 @@ export function TripContextSummary({
         {!compact && primaryCommitment && (
           <div>
             <dt>Key commitment</dt>
-            <dd>{primaryCommitment.title} · {timeFormatter.format(new Date(primaryCommitment.startsAt))}</dd>
+            <dd>{primaryCommitment.title} · {formatTime(primaryCommitment.startsAt, request.route.destination.timeZone)}</dd>
           </div>
         )}
         {!compact && (
           <div>
             <dt>Arrival</dt>
-            <dd>Before {timeFormatter.format(new Date(request.arriveBefore))} on {formatDate(request.departureDate)}</dd>
+            <dd>Before {formatTime(request.arriveBefore, request.route.destination.timeZone)} on {formatDate(request.departureDate)}</dd>
           </div>
         )}
         {!compact && (

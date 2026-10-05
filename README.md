@@ -21,7 +21,7 @@ uv sync
 npm run dev:api
 ```
 
-Vite prints the local URL in the terminal, normally `http://localhost:5173`.
+Next.js prints the local URL in the terminal, normally `http://localhost:3000`.
 
 ### Local assistant setup
 
@@ -40,7 +40,7 @@ export LM_STUDIO_MODEL=qwen/qwen3.5-9b
 
 ### Geographic setup
 
-Copy `.env.example` to `.env` and set `GEOAPIFY_API_KEY` to enable real city lookup and MapLibre tiles. The key is sent to the map style at runtime, so restrict it to the local/demo origin in Geoapify. Geographic lookup is the only external integration; all travel options and confirmations remain fictional.
+Copy `.env.example` to `.env` and set `GEOAPIFY_API_KEY` to enable real city lookup and MapLibre tiles. The key is sent to the map style at runtime, so restrict it to the local/demo origin in Geoapify. Geographic lookup is the only external integration; all travel options and confirmations remain fictional. CopilotKit telemetry is disabled by default for this local demo.
 
 ## Available commands
 
@@ -57,20 +57,20 @@ uv run pytest   # Run the local assistant API tests
 
 - `src/components/`: reusable interface components
 - `src/data/`: canonical fictional data for the demonstration
-- `src/plan/`: shared in-session plan actions and AG-UI conversation transport
+- `src/plan/`: shared in-session plan actions
 - `src/styles/`: global and application-level styles
-- `src/App.tsx`: the single demonstration route
+- `app/`: Next.js route, CopilotKit provider and local Copilot Runtime
+- `src/App.tsx`: the client-side Atlas Travel workspace
 
 ### Conversational widgets
 
-FastAPI serves `/api/assistant/ag-ui` directly; no Node assistant runtime is needed.
-The browser registers typed frontend tools and retains their call IDs and structured
-results in session history. Choosing dates, a flight, a stay, or simulated confirmation
-automatically resumes the agent. Numeric dates require full dates in the calendar;
-Atlas Travel interprets and displays them as DD/MM/YYYY. Written Portuguese and English
-dates are pre-filled for review; an omitted year uses the current calendar year. The traditional UI and the chat
-use the same plan engine and canonical fictional prices. Changing a plan invalidates
-its previous review. A failed response can be retried without losing the chosen values.
+The browser connects to the local Copilot Runtime at `/api/copilotkit`; the runtime
+forwards AG-UI requests to FastAPI/PydanticAI. The Atlas rail is a headless CopilotKit
+chat that registers typed frontend tools, a GenUI status component, tool rendering and
+human-in-the-loop decisions. Choosing dates, a flight, a stay, or simulated confirmation
+automatically resumes the agent. The shared React plan is mirrored into agent state;
+prices, policy and confirmation remain canonical local calculations. No CopilotKit
+Intelligence, persistence or external AI service is configured.
 
 Frontend component tests use Vitest, Testing Library and jsdom; backend AG-UI tests
 use PydanticAI's local FunctionModel, so they do not require LM Studio or network access.

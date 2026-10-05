@@ -44,7 +44,7 @@ O mock estará concluído quando demonstrar, ponta a ponta, que a mesma platafor
 
 ## Direção técnica de evolução
 
-Depois que o fluxo manual estiver estabelecido, o mock evoluirá a interface web React existente com MapLibre GL JS e um backend local em Python/FastAPI. Geoapify será a única integração externa, limitada à geocodificação de localidades e aos tiles do mapa; a chave fica no ambiente local e deve ser restringida por origem no provedor. O agente PydanticAI será exposto por AG-UI diretamente pelo FastAPI e consumido pela SPA Vite. Ele chamará as mesmas capacidades do plano legado e atualizará componentes React registrados como GenUI tipada; a confirmação simulada continua uma decisão humana explícita. A geografia pode ser real; planejamento, preços, políticas, seleções e confirmação permanecem inteiramente fictícios. Nenhum agente gera HTML ou JSX arbitrário.
+Depois que o fluxo manual estiver estabelecido, o mock evoluirá para Next.js com MapLibre GL JS e um backend local em Python/FastAPI. Geoapify será a única integração externa, limitada à geocodificação de localidades e aos tiles do mapa; a chave fica no ambiente local e deve ser restringida por origem no provedor. O agente PydanticAI será exposto por AG-UI no FastAPI e alcançado pelo Copilot Runtime local do Next.js. A rail Atlas usa CopilotKit headless, ferramentas frontend tipadas, componentes GenUI, tool rendering, estado compartilhado e decisões human-in-the-loop; a confirmação simulada continua uma decisão humana explícita. A geografia pode ser real; planejamento, preços, políticas, seleções e confirmação permanecem inteiramente fictícios. Nenhum agente gera HTML ou JSX arbitrário.
 
 ## Critérios de aceite
 

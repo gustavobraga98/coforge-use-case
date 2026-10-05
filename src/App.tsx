@@ -1,6 +1,8 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { AssistantPanel } from './components/AssistantPanel'
-import { initialConversation } from './plan/agUiConversation'
+'use client'
+
+import dynamic from 'next/dynamic'
+import { useEffect, useRef, useState } from 'react'
+import { CopilotAssistantPanel } from './components/CopilotAssistantPanel'
 import { useTravelPlan } from './plan/useTravelPlan'
 import { TraditionalPlanCostSummary } from './components/TraditionalPlanCostSummary'
 import {
@@ -22,8 +24,9 @@ import { TripContextSummary } from './components/TripContextSummary'
 import { atlasTravelScenarios, atlasTravelScenario, createGeneratedTripScenario, type TripScenario } from './data/tripScenario'
 import './styles/app.css'
 
-const GlobeWorkspace = lazy(() =>
-  import('./components/GlobeWorkspace').then(({ GlobeWorkspace }) => ({ default: GlobeWorkspace })),
+const GlobeWorkspace = dynamic(
+  () => import('./components/GlobeWorkspace').then(({ GlobeWorkspace: Workspace }) => Workspace),
+  { ssr: false, loading: () => <div className="globe-loading" role="status">Loading interactive globe…</div> },
 )
 
 function createInitialTraditionalSearchCriteria(scenario: TripScenario): TraditionalSearchCriteria {
@@ -91,7 +94,6 @@ function TraditionalPlanningProgress({ currentStep }: { currentStep: Traditional
 export default function App() {
   const [assistantEnabled, setAssistantEnabled] = useState(false)
   const [assistantActivation, setAssistantActivation] = useState(0)
-  const [conversation, setConversation] = useState(initialConversation)
   const { plan, dispatch, getPlan } = useTravelPlan()
   const [traditionalSearchCriteria, setTraditionalSearchCriteria] = useState<TraditionalSearchCriteria>(() =>
     initialTraditionalCriteria,
@@ -184,7 +186,6 @@ export default function App() {
 
   function startAnotherTraditionalPlan() {
     dispatch({ type: 'reset' })
-    setConversation(initialConversation())
     setTraditionalSearchCriteria(initialTraditionalCriteria)
     setTraditionalResultsTab('flights')
     setTraditionalConfirmationState('results')
@@ -231,9 +232,7 @@ export default function App() {
       <div className={`workspace ${assistantEnabled ? `workspace--assisted workspace--assistant-activation-${assistantActivation}` : 'workspace--traditional'}${isTaskFocused ? ' workspace--task-focused' : ''}`}>
         {assistantEnabled && <span className="assistant-activation-scan" aria-hidden="true" />}
         {!isTaskFocused && (
-          <Suspense fallback={<div className="globe-loading" role="status">Loading interactive globe…</div>}>
-            <GlobeWorkspace route={route} assistantEnabled={assistantEnabled} />
-          </Suspense>
+          <GlobeWorkspace route={route} assistantEnabled={assistantEnabled} />
         )}
 
         {!isTaskFocused && scenario && <Surface as="aside" className="planning-rail planning-rail--left" label="Route overview">
@@ -282,7 +281,7 @@ export default function App() {
             />}
           {isTaskFocused && <TraditionalPlanningProgress currentStep={currentPlanningStep} />}
           {assistantEnabled ? (
-            <AssistantPanel plan={plan} getPlan={getPlan} dispatch={dispatch} conversation={conversation} onConversationChange={setConversation} />
+            <CopilotAssistantPanel plan={plan} getPlan={getPlan} dispatch={dispatch} />
           ) : traditionalConfirmationState === 'review' ? (
             <TraditionalPlanConfirmation
               scenario={activeScenario}
@@ -346,9 +345,7 @@ export default function App() {
         )}
 
         {isTaskFocused && (
-          <Suspense fallback={<div className="globe-loading" role="status">Loading route map…</div>}>
-            <GlobeWorkspace route={route} assistantEnabled={assistantEnabled} compact />
-          </Suspense>
+          <GlobeWorkspace route={route} assistantEnabled={assistantEnabled} compact />
         )}
       </div>
     </main>

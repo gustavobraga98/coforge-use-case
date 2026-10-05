@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Estabelecer uma jornada conversacional local via PydanticAI e AG-UI no FastAPI, coordenando apenas dados e decisões fictícios do plano.
+Estabelecer uma jornada conversacional local via PydanticAI, AG-UI e CopilotKit, coordenando apenas dados e decisões fictícios do plano.
 
 ## Escopo
 
@@ -17,14 +17,15 @@ Estabelecer uma jornada conversacional local via PydanticAI e AG-UI no FastAPI, 
 - Indicar que o plano está sendo organizado.
 - Preparar as áreas que receberão alternativas nas próximas etapas.
 - Expor o agente em `/api/assistant/ag-ui` por `AGUIAdapter.dispatch_request` e manter `/api/assistant/interpret` compatível.
-- Consumir o stream AG-UI diretamente do FastAPI; manter componentes GenUI tipados com Zod sem um processo Node adicional.
+- Usar o App Router do Next.js como aplicação web e o Copilot Runtime local como ponte entre a rail Atlas e o stream AG-UI do FastAPI.
+- Manter a rail Atlas em CopilotKit headless, com componentes GenUI tipados por Zod e sem UI de chat pronta do framework.
 - Espelhar rota, período, filtros, seleções, custo e confirmação entre chat e workspace; confirmação simulada exige decisão humana explícita.
 - Padronizar todas as datas visíveis em `DD/MM/YYYY`. Datas numéricas seguem essa leitura; datas em português ou inglês por extenso preenchem o calendário com o valor ISO correspondente para aprovação ou edição.
 - Ampliação de escopo aprovada: calendário, seleção de voo/hospedagem, custos, revisão e confirmação simulada também são operáveis no chat.
-- Registrar ferramentas frontend no payload AG-UI, preservar chamadas e resultados no histórico de protocolo e retomar automaticamente após cada decisão humana.
+- Registrar ferramentas frontend tipadas no CopilotKit, preservar chamadas e resultados no histórico do protocolo e retomar automaticamente após cada decisão humana.
 - Usar um motor compartilhado de plano para ambos os modos, com preços canônicos e invalidação de seleções/revisão quando o período muda.
 - Permitir editar escolhas anteriores e repetir uma resposta interrompida sem perder a decisão já aplicada.
-- Limitar as ferramentas AG-UI oferecidas em cada turno à próxima etapa elegível (`rota → datas → voo → hospedagem → revisão → confirmação`), para que o modelo não possa saltar etapas ou atualizar preços e seleções fora do motor local.
+- Validar cada ferramenta contra a próxima etapa elegível (`rota → datas → voo → hospedagem → revisão → confirmação`), para que o modelo não possa saltar etapas ou atualizar preços e seleções fora do motor local.
 - Preservar um retrato do plano em cada widget histórico; alterações posteriores não podem reescrever uma comparação ou custo já exibido.
 
 ## Critérios de aceite
@@ -40,7 +41,7 @@ Estabelecer uma jornada conversacional local via PydanticAI e AG-UI no FastAPI, 
 - Datas ambíguas não recebem ordem ou ano presumidos. Os campos exigem datas completas e retorno posterior à partida.
 - O agente recebe estado atualizado e avança de calendário para voo, hospedagem, custos e revisão sem repetir decisões resolvidas.
 - Texto isolado não confirma a simulação; o botão de revisão exige plano elegível e revisão atual.
-- Testes de componentes exercitam cliques e os payloads seguintes; testes do endpoint verificam descoberta e retomada de ferramentas via SSE.
+- Testes de componentes exercitam cliques e os payloads seguintes; testes do endpoint verificam descoberta e retomada de ferramentas pelo Copilot Runtime e AG-UI.
 
 ## Fora de escopo
 

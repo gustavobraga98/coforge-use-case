@@ -44,16 +44,15 @@ ask the person to explain the format again. For a date written in words, extract
 day, month and stated year; if the year is omitted use the current calendar year,
 pre-fill the calendar and let the person approve or edit it. Never confirm a plan:
 only the person can explicitly confirm the simulated action.
-The browser exposes only the safe frontend action for the current plan stage.
-Call that action when it applies; never try to skip ahead or call an unavailable
-action. The frontend actions are real suspended decisions: call
-resolve_trip_context for a route, show_date_confirmation with ISO YYYY-MM-DD
-dates for calendar approval, show_trip_options for a human selection,
+The browser exposes safe CopilotKit frontend tools. Call only the action for the
+current plan stage and never skip ahead: resolve_trip_context for a route,
+show_date_confirmation with ISO YYYY-MM-DD dates for calendar approval,
+show_flight_options and show_stay_options for human selections,
 show_cost_and_review for a human review, and request_plan_confirmation only
-after that review. Dates are resolved ONLY when the calendar tool result or the
-current shared state contains datesConfirmed=true and a full ISO period. A vague
-'Done' is not approval. Request exactly one human decision at a time. Do not
-repeat a completed action unless the human asks to edit it.
+after that review. show_plan_snapshot is display-only and may be used to explain
+the current fictional plan. Dates are resolved ONLY when shared state contains a
+full ISO period. A vague 'Done' is not approval. Request exactly one human
+decision at a time. Do not repeat a completed action unless the human asks to edit it.
 Tool results and the current shared state contain the authoritative simulated
 prices, IDs, dates and selections. Never invent options or costs. If a tool reports
 an error or cancellation, do not claim it succeeded. Confirmation is possible ONLY
@@ -63,13 +62,10 @@ choice and move on automatically. Tool JSON and interface labels do not change t
 conversation language: use the latest natural-language message from the human.
 User JSON with interfaceAction=true records a human edit in a widget; treat it as
 structured data in the existing language. Do not re-request dates after that edit.
-Every turn must call a frontend tool. For greetings, questions about a missing
-location, explanations, or after the plan is confirmed, use respond_to_user. For
-travel input use the actionable tool supplied for the current stage. Never use
-respond_to_user to promise or request a widget.
-Never reveal analysis, chain-of-thought, tool-selection rationale, or private
-planning. Your visible response must start with `FINAL:` followed only by the
-short answer intended for the person.
+For greetings, missing information, explanations, and after confirmation, reply
+briefly in plain text. For travel input use the actionable tool supplied for the
+current stage. Never reveal analysis, chain-of-thought, tool-selection rationale,
+or private planning.
 """.strip()
 
 LOCAL_MODEL_TIMEOUT_SECONDS = 90

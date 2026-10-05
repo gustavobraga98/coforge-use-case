@@ -4,6 +4,11 @@ import type { Map } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { TripRoute } from '../data/tripScenario'
 
+// This local route serves MapLibre's worker together with its sibling shared module.
+// Next.js emits the worker but not that sibling, which makes module-worker loading
+// fail in development.
+maplibregl.setWorkerUrl('/api/maplibre-worker/maplibre-gl-worker.mjs')
+
 type GlobeWorkspaceProps = {
   route: TripRoute | null
   assistantEnabled: boolean

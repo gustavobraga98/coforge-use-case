@@ -1,6 +1,8 @@
 node_modules/
 dist/
 .vite/
+.next/
+tsconfig.tsbuildinfo
 .venv/
 .env
 .pytest_cache/

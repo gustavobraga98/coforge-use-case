@@ -22,7 +22,8 @@ def test_ag_ui_discovers_calendar_and_resumes_with_human_dates(monkeypatch, gree
         if not results:
             yield {0: DeltaToolCall(name='show_date_confirmation', json_args='{"departureDate":"04/11","returnDate":"04/12"}', tool_call_id='calendar-1')}
         else:
-            result = json.loads(results[-1].content)
+            content = results[-1].content
+            result = json.loads(content) if isinstance(content, str) else content
             assert result['period'] == {'departureDate': '2026-11-04', 'returnDate': '2026-12-04'}
             assert result['datesConfirmed'] is True
             yield 'FINAL: Dates received. Choose a simulated flight.'

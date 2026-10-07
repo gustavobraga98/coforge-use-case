@@ -13,7 +13,7 @@ export function visibleText(content: string): string {
 }
 
 export async function readAgUiStream(response: Response, onEvent: (event: Record<string, unknown>) => void) {
-  if (!response.ok) throw new Error('The local assistant is unavailable. Start LM Studio and retry.')
+  if (!response.ok) throw new Error('The Codex assistant is unavailable. Run `codex login` and retry.')
   if (!response.body) throw new Error('The assistant returned an empty stream.')
   const reader = response.body.getReader()
   const decoder = new TextDecoder()

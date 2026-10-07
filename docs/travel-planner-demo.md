@@ -47,9 +47,9 @@ O mock começa sem uma viagem pré-configurada. A busca tradicional oferece uma 
 
 A demonstração começa com um pedido natural, como:
 
-> “Planeje uma viagem para Gustavo, de São Paulo a Nova York, entre 12 e 16 de novembro. Ele precisa chegar antes das 15h no dia 12, prefere voos diretos e o orçamento é de até US$ 3.000.”
+> “Planeje uma viagem para Gustavo, de São Paulo a Nova York, entre 12 e 16 de novembro. Ele precisa chegar antes das 15h no dia 12 e prefere voos diretos.”
 
-A plataforma transforma esse pedido em um plano de viagem. Para isso, considera preferências do viajante, datas, agenda, orçamento e regras da empresa, sempre com informações totalmente fictícias.
+A plataforma primeiro solicita e registra explicitamente o teto de orçamento da viagem; US$ 3.000 pode aparecer apenas como sugestão fictícia, nunca como valor presumido. Em seguida, transforma o pedido em um plano de viagem considerando preferências do viajante, datas, agenda, orçamento escolhido e regras da empresa, sempre com informações totalmente fictícias.
 
 Em seguida, ela apresenta alternativas que façam sentido. Por exemplo, uma opção mais econômica, outra mais confortável e outra que priorize o horário de chegada.
 
@@ -99,7 +99,7 @@ As escolhas nos widgets retornam ao agente automaticamente. Confirmar o calendá
 
 ## Jornada demonstrada
 
-1. A pessoa descreve a necessidade da viagem.
+1. A pessoa descreve a necessidade da viagem e define o teto de orçamento.
 2. A plataforma organiza as restrições e identifica informações que faltam.
 3. Ela monta alternativas coerentes e explica seus principais trade-offs.
 4. A pessoa escolhe uma alternativa ou ajusta preferências pela própria tela.
@@ -118,7 +118,7 @@ Esse segundo momento reforça que a plataforma não serve apenas para pesquisar 
 ## Limites do mock
 
 - Todos os nomes, valores, itinerários, políticas e reservas serão fictícios.
-- A única integração externa permitida é Geoapify, usada exclusivamente para geocodificar localidades e renderizar o mapa. A geografia é real; planejamento, preços, políticas e confirmação seguem fictícios.
+- As únicas integrações externas permitidas são Geoapify, usada exclusivamente para geocodificar localidades e renderizar o mapa, e o provider `openai-codex` do PydanticAI, autenticado pela assinatura Codex local. A geografia é real; planejamento, preços, políticas e confirmação seguem fictícios.
 - Nenhuma integração real, compra, reserva ou comunicação externa será realizada.
 - A demonstração não reproduz telas, dados, regras ou fluxos de qualquer cliente.
 - O foco é a experiência e o potencial de aplicação em diferentes plataformas, não o funcionamento de uma operação de viagens real.

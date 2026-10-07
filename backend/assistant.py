@@ -7,12 +7,9 @@ import re
 from dataclasses import dataclass
 from datetime import datetime, time, timezone
 
-from openai import AsyncOpenAI
 from pydantic_ai import Agent, PromptedOutput, RunContext
 from pydantic_ai.ui import StateDeps
-from pydantic_ai.models.openai import OpenAIChatModel
-from pydantic_ai.profiles.openai import OpenAIModelProfile
-from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.models.openai_codex import OpenAICodexModel
 
 from .schemas import (
     ChatMessage,
@@ -45,7 +42,8 @@ day, month and stated year; if the year is omitted use the current calendar year
 pre-fill the calendar and let the person approve or edit it. Never confirm a plan:
 only the person can explicitly confirm the simulated action.
 The browser exposes safe CopilotKit frontend tools. Call only the action for the
-current plan stage and never skip ahead: resolve_trip_context for a route,
+current plan stage and never skip ahead: show_budget_confirmation for an explicit
+human budget decision, resolve_trip_context for a route,
 show_date_confirmation with ISO YYYY-MM-DD dates for calendar approval,
 show_flight_options and show_stay_options for human selections,
 show_cost_and_review for a human review, and request_plan_confirmation only
@@ -62,31 +60,36 @@ choice and move on automatically. Tool JSON and interface labels do not change t
 conversation language: use the latest natural-language message from the human.
 User JSON with interfaceAction=true records a human edit in a widget; treat it as
 structured data in the existing language. Do not re-request dates after that edit.
-For greetings, missing information, explanations, and after confirmation, reply
+The budget is never assumed from a scenario or past example. When the budget step
+is available, ask for it through show_budget_confirmation. If the latest user
+message supplies a clear USD amount, pass that exact amount as suggestedBudgetUsd
+so the confirmation field is pre-filled; a suggestion is not a confirmed choice.
+A tool result with budgetConfirmed=true is an explicit,
+successful choice: its budgetUsd and state.plan.budgetUsd are authoritative. Never
+ask for a budget, offer a different amount, or mention a suggestion after that
+result. If assistantProgress is route, acknowledge the confirmed budget once and
+continue to the route: apply resolve_trip_context when the conversation already
+contains an origin and destination, otherwise ask only for those places. For greetings, missing information, explanations, and after confirmation, reply
 briefly in plain text. For travel input use the actionable tool supplied for the
 current stage. Never reveal analysis, chain-of-thought, tool-selection rationale,
 or private planning.
 """.strip()
 
-LOCAL_MODEL_TIMEOUT_SECONDS = 90
+CODEX_MODEL_TIMEOUT_SECONDS = 90
 
 
-class LocalModelError(RuntimeError):
-    """Raised when the local inference endpoint cannot produce a valid interpretation."""
+class CodexModelError(RuntimeError):
+    """Raised when the Codex provider cannot produce a valid interpretation."""
 
 
 @dataclass(frozen=True)
-class LocalModelSettings:
-    base_url: str
+class CodexModelSettings:
     model: str
-    api_key: str
 
     @classmethod
-    def from_environment(cls) -> "LocalModelSettings":
+    def from_environment(cls) -> "CodexModelSettings":
         return cls(
-            base_url=os.getenv("LM_STUDIO_BASE_URL", "http://127.0.0.1:1234/v1"),
-            model=os.getenv("LM_STUDIO_MODEL", "qwen/qwen3.5-9b"),
-            api_key=os.getenv("LM_STUDIO_API_KEY", "lm-studio"),
+            model=os.getenv("CODEX_MODEL", "gpt-6-luna"),
         )
 
 
@@ -139,21 +142,9 @@ def apply_arrival_time_fallback(constraints: TripConstraints, messages: list[Cha
 
 
 class TravelInterpreter:
-    def __init__(self, settings: LocalModelSettings | None = None) -> None:
-        resolved_settings = settings or LocalModelSettings.from_environment()
-        client = AsyncOpenAI(
-            base_url=resolved_settings.base_url,
-            api_key=resolved_settings.api_key,
-            timeout=LOCAL_MODEL_TIMEOUT_SECONDS,
-        )
-        model = OpenAIChatModel(
-            resolved_settings.model,
-            provider=OpenAIProvider(openai_client=client),
-            profile=OpenAIModelProfile(
-                supports_json_object_output=False,
-                openai_chat_supports_multiple_system_messages=False,
-            ),
-        )
+    def __init__(self, settings: CodexModelSettings | None = None) -> None:
+        resolved_settings = settings or CodexModelSettings.from_environment()
+        model = OpenAICodexModel(resolved_settings.model)
         self._agent = Agent(
             model,
             output_type=PromptedOutput(TripConstraints),
@@ -166,23 +157,18 @@ class TravelInterpreter:
         )
 
         try:
-            async with asyncio.timeout(LOCAL_MODEL_TIMEOUT_SECONDS):
+            async with asyncio.timeout(CODEX_MODEL_TIMEOUT_SECONDS):
                 result = await self._agent.run(f"Conversation:\n{transcript}")
         except Exception as error:
-            raise LocalModelError("The local model could not interpret this request.") from error
+            raise CodexModelError("The Codex model could not interpret this request.") from error
 
         return create_interpretation(apply_arrival_time_fallback(result.output, messages))
 
 
-def build_conversational_agent(settings: LocalModelSettings | None = None) -> Agent[StateDeps[dict], str]:
+def build_conversational_agent(settings: CodexModelSettings | None = None) -> Agent[StateDeps[dict], str]:
     """Create the AG-UI agent; the adapter adds deferred frontend tools per run."""
-    resolved = settings or LocalModelSettings.from_environment()
-    client = AsyncOpenAI(base_url=resolved.base_url, api_key=resolved.api_key, timeout=LOCAL_MODEL_TIMEOUT_SECONDS)
-    model = OpenAIChatModel(
-        resolved.model,
-        provider=OpenAIProvider(openai_client=client),
-        profile=OpenAIModelProfile(supports_json_object_output=False, openai_chat_supports_multiple_system_messages=False),
-    )
+    resolved = settings or CodexModelSettings.from_environment()
+    model = OpenAICodexModel(resolved.model)
     agent: Agent[StateDeps[dict], str] = Agent(
         model,
         deps_type=StateDeps[dict],
@@ -190,10 +176,7 @@ def build_conversational_agent(settings: LocalModelSettings | None = None) -> Ag
         instructions=AGENT_INSTRUCTIONS,
         model_settings={
             "parallel_tool_calls": False,
-            "thinking": False,
-            # LM Studio forwards this option to Qwen's chat template. Keep reasoning
-            # out of the protocol stream as well as out of the visible chat.
-            "extra_body": {"chat_template_kwargs": {"enable_thinking": False}},
+            "openai_reasoning_effort": "none",
         },
     )
 

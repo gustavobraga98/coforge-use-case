@@ -2,15 +2,15 @@
 
 ## Objetivo
 
-Estabelecer uma jornada conversacional local via PydanticAI, AG-UI e CopilotKit, coordenando apenas dados e decisões fictícios do plano.
+Estabelecer uma jornada conversacional via PydanticAI, AG-UI e CopilotKit, coordenando apenas dados e decisões fictícios do plano.
 
 ## Escopo
 
 - Disponibilizar um chat para que a pessoa escreva o pedido inicial de planejamento.
 - Exibir o pedido canônico de Gustavo como sugestão clicável, sem enviá-lo automaticamente.
 - Criar um endpoint local em FastAPI com um agente PydanticAI para extrair as restrições do pedido em uma estrutura tipada.
-- Configurar o agente para usar o endpoint compatível com OpenAI do LM Studio. Em desenvolvimento e testes locais, usar o modelo `qwen/qwen3.5-9b`.
-- Manter a URL do endpoint e o nome do modelo configuráveis por variáveis de ambiente, sem credenciais ou serviços externos.
+- Configurar o agente para usar o provider `openai-codex` do PydanticAI, autenticado pelo Codex CLI, com o modelo `gpt-6-luna` como padrão.
+- Manter o nome do modelo configurável por `CODEX_MODEL`, sem armazenar credenciais no projeto.
 - Validar a resposta do agente contra um esquema estruturado antes de apresentá-la na interface.
 - Manter o histórico apenas na sessão atual para que mensagens posteriores possam ajustar as restrições já reconhecidas.
 - Exibir uma resposta inicial que organize visualmente as restrições reconhecidas a partir dos dados estruturados.
@@ -25,13 +25,15 @@ Estabelecer uma jornada conversacional local via PydanticAI, AG-UI e CopilotKit,
 - Registrar ferramentas frontend tipadas no CopilotKit, preservar chamadas e resultados no histórico do protocolo e retomar automaticamente após cada decisão humana.
 - Usar um motor compartilhado de plano para ambos os modos, com preços canônicos e invalidação de seleções/revisão quando o período muda.
 - Permitir editar escolhas anteriores e repetir uma resposta interrompida sem perder a decisão já aplicada.
-- Validar cada ferramenta contra a próxima etapa elegível (`rota → datas → voo → hospedagem → revisão → confirmação`), para que o modelo não possa saltar etapas ou atualizar preços e seleções fora do motor local.
+- Validar cada ferramenta contra a próxima etapa elegível (`orçamento → rota → datas → voo → hospedagem → revisão → confirmação`), para que o modelo não possa saltar etapas ou atualizar preços e seleções fora do motor local.
+- Solicitar e confirmar o teto de orçamento antes de qualquer outra etapa; valores sugeridos não podem ser tratados como escolha da pessoa.
 - Preservar um retrato do plano em cada widget histórico; alterações posteriores não podem reescrever uma comparação ou custo já exibido.
 
 ## Critérios de aceite
 
 - A pessoa pode iniciar a conversa com uma solicitação natural; o pedido de Gustavo está disponível como sugestão de demonstração.
-- Com o LM Studio local disponível, o agente identifica corretamente rota, datas, horário de chegada, voo direto e orçamento.
+- O primeiro widget da jornada assistida solicita o orçamento máximo em USD, sem assumir US$ 3.000; esse valor pode aparecer somente como sugestão editável e deve vir preenchido quando a pessoa já tiver informado um valor monetário inequívoco.
+- Com o Codex CLI autenticado, o agente identifica corretamente rota, datas, horário de chegada, voo direto e orçamento.
 - A interface recebe e apresenta somente dados estruturados e validados; o agente não gera HTML ou JSX.
 - A indisponibilidade do endpoint local apresenta um estado de erro compreensível e não bloqueia o modo tradicional.
 - Pedidos parciais apresentam as restrições identificadas e solicitam objetivamente as informações que faltam.
@@ -45,7 +47,7 @@ Estabelecer uma jornada conversacional local via PydanticAI, AG-UI e CopilotKit,
 
 ## Fora de escopo
 
-Aprovação de exceções, reserva real, integrações de viagem, persistência e uso de modelos ou serviços de IA remotos. Geocodificação segue o limite já aprovado na visão.
+Aprovação de exceções, reserva real, integrações de viagem e persistência. O modelo remoto é limitado ao provider `openai-codex`; geocodificação segue o limite já aprovado na visão.
 
 ## Dependências
 

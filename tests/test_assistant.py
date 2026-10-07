@@ -5,11 +5,11 @@ from types import SimpleNamespace
 import httpx
 import pytest
 from pydantic_ai import PromptedOutput, UnexpectedModelBehavior
-from pydantic_ai.profiles.openai import OpenAIModelProfile
+from pydantic_ai.models.openai_codex import OpenAICodexModel
 
 from backend.assistant import (
-    LOCAL_MODEL_TIMEOUT_SECONDS,
-    LocalModelError,
+    CODEX_MODEL_TIMEOUT_SECONDS,
+    CodexModelError,
     TravelInterpreter,
     apply_arrival_time_fallback,
     create_interpretation,
@@ -78,9 +78,9 @@ def test_endpoint_returns_a_typed_interpretation() -> None:
     assert response.json()["constraints"]["budget"] == {"amount": 3000, "currency": "USD"}
 
 
-def test_endpoint_reports_a_local_model_failure() -> None:
+def test_endpoint_reports_a_codex_model_failure() -> None:
     async def interpret(_: list[ChatMessage]):
-        raise LocalModelError("offline")
+        raise CodexModelError("offline")
 
     async def post_request() -> httpx.Response:
         transport = httpx.ASGITransport(app=create_app(interpret))
@@ -93,26 +93,34 @@ def test_endpoint_reports_a_local_model_failure() -> None:
     response = asyncio.run(post_request())
 
     assert response.status_code == 503
-    assert response.json()["detail"]["code"] == "local_model_unavailable"
+    assert response.json()["detail"]["code"] == "codex_model_unavailable"
 
 
-def test_interpreter_uses_prompted_json_output_with_a_ninety_second_timeout() -> None:
+def test_interpreter_uses_codex_prompted_output_with_a_ninety_second_timeout() -> None:
     interpreter = TravelInterpreter()
 
     assert isinstance(interpreter._agent.output_type, PromptedOutput)
     assert interpreter._agent.output_type.outputs is TripConstraints
-    profile = OpenAIModelProfile.from_profile(interpreter._agent.model.profile)
+    assert isinstance(interpreter._agent.model, OpenAICodexModel)
+    assert interpreter._agent.model.model_name == "gpt-6-luna"
+    assert CODEX_MODEL_TIMEOUT_SECONDS == 90
 
-    assert not profile.supports_json_object_output
-    assert not profile.openai_chat_supports_multiple_system_messages
-    assert LOCAL_MODEL_TIMEOUT_SECONDS == 90
+
+def test_conversational_agent_uses_luna_without_reasoning_for_tool_calls() -> None:
+    from backend.assistant import build_conversational_agent
+
+    agent = build_conversational_agent()
+
+    assert isinstance(agent.model, OpenAICodexModel)
+    assert agent.model.model_name == "gpt-6-luna"
+    assert agent.model_settings["openai_reasoning_effort"] == "none"
 
 
 @pytest.mark.parametrize(
     "failure",
     [httpx.ReadTimeout("local inference timed out"), UnexpectedModelBehavior("invalid JSON output")],
 )
-def test_interpreter_converts_inference_and_invalid_json_failures_to_local_model_errors(
+def test_interpreter_converts_inference_and_invalid_json_failures_to_codex_model_errors(
     failure: Exception,
 ) -> None:
     class FailingAgent:
@@ -122,7 +130,7 @@ def test_interpreter_converts_inference_and_invalid_json_failures_to_local_model
     interpreter = TravelInterpreter()
     interpreter._agent = FailingAgent()  # type: ignore[assignment]
 
-    with pytest.raises(LocalModelError, match="could not interpret") as error:
+    with pytest.raises(CodexModelError, match="could not interpret") as error:
         asyncio.run(interpreter.interpret([ChatMessage(role="user", content="Plan a fictional trip.")]))
 
     assert error.value.__cause__ is failure

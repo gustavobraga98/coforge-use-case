@@ -21,9 +21,11 @@ O mock estará concluído quando demonstrar, ponta a ponta, que a mesma platafor
 ### 3. Construir o modo assistido
 
 - Aceitar um pedido inicial em linguagem natural para a viagem de Gustavo entre São Paulo e Nova York.
-- Extrair e apresentar as restrições: datas, chegada antes das 15h, voo direto e orçamento de até US$ 3.000.
+- Solicitar primeiro um teto de orçamento explícito; US$ 3.000 pode ser sugerido, mas nunca assumido.
+- Extrair e apresentar as restrições: datas, chegada antes das 15h e voo direto.
 - Exibir alternativas com trade-offs claros: economia, conforto e melhor horário.
 - Permitir que a escolha seja feita por componentes visuais, e não apenas pelo chat.
+- Exibir um progresso visível das etapas do agente: orçamento, rota, datas, voo, hospedagem e revisão/confirmação.
 
 ### 4. Demonstrar governança e decisão
 
@@ -44,7 +46,7 @@ O mock estará concluído quando demonstrar, ponta a ponta, que a mesma platafor
 
 ## Direção técnica de evolução
 
-Depois que o fluxo manual estiver estabelecido, o mock evoluirá para Next.js com MapLibre GL JS e um backend local em Python/FastAPI. Geoapify será a única integração externa, limitada à geocodificação de localidades e aos tiles do mapa; a chave fica no ambiente local e deve ser restringida por origem no provedor. O agente PydanticAI será exposto por AG-UI no FastAPI e alcançado pelo Copilot Runtime local do Next.js. A rail Atlas usa CopilotKit headless, ferramentas frontend tipadas, componentes GenUI, tool rendering, estado compartilhado e decisões human-in-the-loop; a confirmação simulada continua uma decisão humana explícita. A geografia pode ser real; planejamento, preços, políticas, seleções e confirmação permanecem inteiramente fictícios. Nenhum agente gera HTML ou JSX arbitrário.
+Depois que o fluxo manual estiver estabelecido, o mock evoluirá para Next.js com MapLibre GL JS e um backend local em Python/FastAPI. Geoapify é limitado à geocodificação de localidades e aos tiles do mapa; a chave fica no ambiente local e deve ser restringida por origem no provedor. O agente PydanticAI usa o provider `openai-codex`, autenticado pela assinatura Codex local, é exposto por AG-UI no FastAPI e alcançado pelo Copilot Runtime local do Next.js. A rail Atlas usa CopilotKit headless, ferramentas frontend tipadas, componentes GenUI, tool rendering, estado compartilhado e decisões human-in-the-loop; a confirmação simulada continua uma decisão humana explícita. A geografia pode ser real; planejamento, preços, políticas, seleções e confirmação permanecem inteiramente fictícios. Nenhum agente gera HTML ou JSX arbitrário.
 
 ## Critérios de aceite
 
@@ -53,11 +55,12 @@ Depois que o fluxo manual estiver estabelecido, o mock evoluirá para Next.js co
 - Mudanças invalidam a revisão anterior. Falhas do modelo preservam as escolhas e permitem repetir a resposta sem reaplicar a confirmação.
 - O histórico do protocolo preserva mensagens `assistant.toolCalls` e `tool.toolCallId`; o histórico visual exibe cada widget junto à mensagem correspondente. Conteúdo de raciocínio não é exibido.
 - A interface apresenta datas em `DD/MM/YYYY`. O calendário recebe valores ISO internamente e vem pré-preenchido para datas numéricas no padrão local ou informadas por extenso.
-- Verificação automatizada inclui componentes React, motor de plano e ciclo real de serialização/deserialização AG-UI com modelo de teste local. O modelo LM Studio é verificado separadamente por smoke test.
+- Verificação automatizada inclui componentes React, motor de plano e ciclo real de serialização/deserialização AG-UI com modelo de teste local. O provider Codex é verificado separadamente após `codex login`.
 
 - A apresentação permite executar o fluxo manual e repetir o mesmo objetivo via IA.
 - A tela inicial não traz uma viagem pronta; a pessoa pode escolher São Paulo, Rio de Janeiro ou Buenos Aires como origem e Nova York, Londres ou Cidade do México como destino no modo tradicional, e a rota, o contexto, as opções e os valores exibidos acompanham o cenário selecionado.
 - A IA coordena capacidades existentes da plataforma, sem parecer substituí-la.
+- No modo assistido, o progresso visível do agente acompanha o estado do plano, retrocede quando escolhas anteriores são invalidadas e mantém todas as etapas concluídas após a confirmação simulada.
 - Cada escolha relevante apresenta contexto, comparação e consequência financeira ou de política.
 - Reservas, dados e aprovações são explicitamente fictícios e simulados.
 - O resultado final reúne, de forma compreensível, itinerário, custo, status e próximos passos.

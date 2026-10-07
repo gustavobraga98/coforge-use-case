@@ -9,7 +9,7 @@ Fictional corporate travel-planning demonstration. It uses only simulated data a
 
 ## Run locally
 
-Install dependencies, then start the frontend and the local assistant API in separate terminals:
+Install dependencies, authenticate Codex, then start the frontend and the local assistant API in separate terminals:
 
 ```bash
 npm install
@@ -23,20 +23,23 @@ npm run dev:api
 
 Next.js prints the local URL in the terminal, normally `http://localhost:3000`.
 
-### Local assistant setup
+### Codex assistant setup
 
-The assisted chat uses a local LM Studio server only. In LM Studio, load
-`qwen/qwen3.5-9b` and start the server from the Developer tab. The default
-OpenAI-compatible endpoint is `http://127.0.0.1:1234/v1`.
-
-These optional environment variables configure the backend:
+The assisted chat uses PydanticAI's `openai-codex` provider with your existing
+ChatGPT/Codex subscription. Authenticate the Codex CLI once before starting the API:
 
 ```bash
-export LM_STUDIO_BASE_URL=http://127.0.0.1:1234/v1
-export LM_STUDIO_MODEL=qwen/qwen3.5-9b
+codex login
 ```
 
-`LM_STUDIO_API_KEY` is optional and is only needed if local authentication was enabled in LM Studio.
+The backend reads the CLI credentials from `~/.codex/auth.json` without writing to
+that file. The model defaults to `gpt-6-luna`; set `CODEX_MODEL` only to override it:
+
+```bash
+export CODEX_MODEL=gpt-6-luna
+```
+
+No OpenAI API key is required for the Codex provider.
 
 ### Geographic setup
 
@@ -73,4 +76,4 @@ prices, policy and confirmation remain canonical local calculations. No CopilotK
 Intelligence, persistence or external AI service is configured.
 
 Frontend component tests use Vitest, Testing Library and jsdom; backend AG-UI tests
-use PydanticAI's local FunctionModel, so they do not require LM Studio or network access.
+use PydanticAI's local FunctionModel, so they do not require Codex credentials or network access.

@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Request, status
 from pydantic_ai.ui.ag_ui import AGUIAdapter
 from pydantic_ai.ui import StateDeps
 
-from .assistant import LocalModelError, TravelInterpreter, build_conversational_agent
+from .assistant import CodexModelError, TravelInterpreter, build_conversational_agent
 from .geography import GeoapifyError, GeoapifyGeocoder, Geocoder, geoapify_map_style
 from .schemas import AssistantTurn, ChatMessage, GeocodeRequest, GeocodedLocation, InterpretRequest, InterpretResponse, MapConfiguration
 
@@ -41,10 +41,10 @@ def create_app(interpreter: Interpreter | None = None, geocoder: Geocoder | None
     async def interpret_trip_request(payload: InterpretRequest) -> InterpretResponse:
         try:
             return await interpret(payload.messages)
-        except LocalModelError as error:
+        except CodexModelError as error:
             cause = error.__cause__
             logger.error(
-                "Local model interpretation failed (%s): %s",
+                "Codex model interpretation failed (%s): %s",
                 type(cause).__name__ if cause is not None else "unknown error",
                 cause,
                 exc_info=error,
@@ -52,8 +52,8 @@ def create_app(interpreter: Interpreter | None = None, geocoder: Geocoder | None
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail={
-                    "code": "local_model_unavailable",
-                    "message": "The local LM Studio model is unavailable. Start the server, load the model, and try again.",
+                    "code": "codex_model_unavailable",
+                    "message": "The Codex model is unavailable. Run `codex login` and try again.",
                 },
             ) from error
 
@@ -73,7 +73,7 @@ def create_app(interpreter: Interpreter | None = None, geocoder: Geocoder | None
 
     @app.post("/api/assistant/ag-ui")
     async def assistant_ag_ui(request: Request):
-        """Stream the local PydanticAI assistant using the AG-UI protocol."""
+        """Stream the PydanticAI Codex assistant using the AG-UI protocol."""
         try:
             payload = await request.json()
             plan_state = payload.get('state', {})
@@ -84,7 +84,7 @@ def create_app(interpreter: Interpreter | None = None, geocoder: Geocoder | None
             logger.error("AG-UI assistant failed", exc_info=error)
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail={"code": "local_model_unavailable", "message": "The local AG-UI assistant is unavailable. Start LM Studio and try again."},
+                detail={"code": "codex_model_unavailable", "message": "The Codex AG-UI assistant is unavailable. Run `codex login` and try again."},
             ) from error
 
     return app

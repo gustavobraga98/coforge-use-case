@@ -65,7 +65,10 @@ export function GlobeWorkspace({ route, assistantEnabled, compact = false }: Glo
         markerElement.setAttribute('aria-label', location.city)
         return new maplibregl.Marker({ element: markerElement }).setLngLat([location.longitude, location.latitude]).addTo(currentMap)
       })
-      currentMap.fitBounds([from, to], { padding: compact ? 36 : 100, duration: 650, maxZoom: compact ? 3 : 4 })
+      const bounds = new maplibregl.LngLatBounds()
+      bounds.extend(from)
+      bounds.extend(to)
+      currentMap.fitBounds(bounds, { padding: compact ? 36 : 100, duration: 650, maxZoom: compact ? 3 : 4 })
     }
     if (currentMap.loaded()) {
       draw()

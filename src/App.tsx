@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
 import { CopilotAssistantPanel } from './components/CopilotAssistantPanel'
+import { AssistantPlanningProgress } from './components/AssistantPlanningProgress'
 import { useTravelPlan } from './plan/useTravelPlan'
 import { TraditionalPlanCostSummary } from './components/TraditionalPlanCostSummary'
 import {
@@ -228,6 +229,8 @@ export default function App() {
           </Button>
         </div>
       </header>
+
+      {assistantEnabled && <AssistantPlanningProgress plan={plan} />}
 
       <div className={`workspace ${assistantEnabled ? `workspace--assisted workspace--assistant-activation-${assistantActivation}` : 'workspace--traditional'}${isTaskFocused ? ' workspace--task-focused' : ''}`}>
         {assistantEnabled && <span className="assistant-activation-scan" aria-hidden="true" />}

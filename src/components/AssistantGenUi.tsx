@@ -10,6 +10,19 @@ import { formatDateRange, toIsoDate } from '../plan/dateFormat'
 type Props = { widget: AssistantGenUiWidget; plan: AssistantPlanState; busy: boolean; onAction: (widget: AssistantGenUiWidget, action: PlanAction | null) => void }
 const money = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
 
+function BudgetWidget({ widget, busy, onAction }: Props) {
+  const [budgetUsd, setBudgetUsd] = useState(String(widget.args.suggestedBudgetUsd ?? 3000))
+  const value = Number(budgetUsd)
+  return <section className="assistant-genui" aria-label="Set trip budget">
+    <h3>Set your trip budget</h3>
+    <p>What is the maximum fictional trip budget? US$3,000 is only a suggestion.</p>
+    <form onSubmit={(event) => { event.preventDefault(); if (Number.isFinite(value) && value > 0) onAction(widget, { type: 'setBudget', budgetUsd: value }) }}>
+      <label className="assistant-budget-field">Maximum budget in USD<input required min="1" step="1" type="number" inputMode="decimal" value={budgetUsd} disabled={busy} onChange={(event) => setBudgetUsd(event.target.value)} /></label>
+      <Button type="submit" disabled={busy || !Number.isFinite(value) || value <= 0}>Set budget</Button>
+    </form>
+  </section>
+}
+
 function CalendarWidget({ widget, plan, busy, onAction }: Props) {
   const [departureDate, setDepartureDate] = useState(plan.period?.departureDate ?? toIsoDate(String(widget.args.departureDate)) ?? '')
   const [returnDate, setReturnDate] = useState(plan.period?.returnDate ?? toIsoDate(String(widget.args.returnDate)) ?? '')
@@ -40,6 +53,7 @@ export function AssistantGenUi(props: Props) {
     return <section className="assistant-genui" aria-label="Planning action result"><p role="status">{widget.result ?? 'Applied to the simulated plan.'}</p>{editable && <Button tone="quiet" disabled={busy} onClick={() => setEditing(true)}>Edit choice</Button>}</section>
   }
   if (widget.name === 'respond_to_user') return <section className="assistant-genui" aria-label="Assistant response"><p>{String(widget.args.message)}</p></section>
+  if (widget.name === 'show_budget_confirmation') return <BudgetWidget {...actionableProps} />
   if (widget.name === 'show_date_confirmation') return <CalendarWidget {...actionableProps} />
   if (widget.name === 'resolve_trip_context') return <section className="assistant-genui"><h3>Route</h3><p>{String(widget.args.origin)} → {String(widget.args.destination)}</p></section>
   if (!plan.scenario) return <section className="assistant-genui"><p>Confirm the route and dates to continue.</p></section>

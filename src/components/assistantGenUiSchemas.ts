@@ -3,6 +3,7 @@ import type { AssistantPlanState, PlanStage } from '../plan/travelPlan'
 
 export const widgetSchemas = {
   respond_to_user: z.object({ message: z.string().min(1) }),
+  show_budget_confirmation: z.object({ suggestedBudgetUsd: z.number().positive().optional() }),
   resolve_trip_context: z.object({ origin: z.string().min(1), destination: z.string().min(1) }),
   show_date_confirmation: z.object({ departureDate: z.string(), returnDate: z.string() }),
   show_trip_options: z.object({ kind: z.enum(['flights', 'stays']) }),
@@ -20,7 +21,8 @@ export type AssistantGenUiWidget = {
   snapshot?: AssistantPlanState
 }
 const descriptions: Record<WidgetName, string> = {
-  respond_to_user: 'Send a short conversational answer for a greeting, missing location, explanation, or a completed plan. Do not use this to ask for dates, options or confirmation: call their widget tool instead.',
+  respond_to_user: 'Send a short conversational answer for a greeting, missing information, explanation, or a completed plan. Do not use this to ask for budget, dates, options or confirmation: call their widget tool instead.',
+  show_budget_confirmation: 'Ask the human to set the maximum fictional trip budget in USD. A suggested value may be supplied, but it is never an assumed budget. Wait for the result before resolving the route.',
   resolve_trip_context: 'Apply the supplied origin and destination to the shared simulated plan and map.',
   show_date_confirmation: 'Ask the human to choose full ISO departure and return dates in an editable calendar. Pass the original date strings, even when ambiguous. Wait for its result before showing options.',
   show_trip_options: 'Show canonical simulated flights or stays and wait for a human selection. Dates and route must already be resolved. Never invent prices or option IDs.',
@@ -37,6 +39,7 @@ function tool(name: WidgetName, schema = widgetSchemas[name]) {
  */
 export function frontendToolsForStage(stage: PlanStage) {
   const answer = tool('respond_to_user')
+  if (stage === 'budget') return [answer, tool('show_budget_confirmation')]
   if (stage === 'route') return [answer, tool('resolve_trip_context')]
   if (stage === 'dates') return [answer, tool('show_date_confirmation')]
   if (stage === 'flights') return [answer, tool('show_trip_options', z.object({ kind: z.literal('flights') }))]

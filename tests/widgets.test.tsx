@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AssistantPanel } from '../src/components/AssistantPanel'
+import { frontendToolsForStage } from '../src/components/assistantGenUiSchemas'
 import { useTravelPlan } from '../src/plan/useTravelPlan'
 import { initialConversation, readAgUiStream, visibleText } from '../src/plan/agUiConversation'
-import { applyPlanAction, initialPlan } from '../src/plan/travelPlan'
+import { applyPlanAction, initialPlan, planStage } from '../src/plan/travelPlan'
 import { findTravelLocation } from '../src/data/tripScenario'
 import { formatDate, toIsoDate } from '../src/plan/dateFormat'
 
@@ -16,6 +17,7 @@ function readyPlan() { return applyPlanAction(applyPlanAction(initialPlan(), { t
 function Harness() {
   const { plan, dispatch, getPlan } = useTravelPlan()
   const [conversation, setConversation] = useState(initialConversation)
+  useEffect(() => { dispatch({ type: 'setBudget', budgetUsd: 3000 }) }, [dispatch])
   return <><AssistantPanel plan={plan} dispatch={dispatch} getPlan={getPlan} conversation={conversation} onConversationChange={setConversation} /><output data-testid="plan">{JSON.stringify(plan)}</output></>
 }
 function stream(events: Record<string, unknown>[]) {
@@ -31,6 +33,13 @@ function tool(name: string, args: unknown, id: string) {
 const end = { type: 'RUN_FINISHED' }
 
 describe('Shared simulated travel plan', () => {
+  it('requires an explicit budget before the assistant may begin route planning', () => {
+    const plan = initialPlan()
+    expect(plan.budgetUsd).toBeNull()
+    expect(planStage(plan)).toBe('budget')
+    expect(planStage(applyPlanAction(plan, { type: 'setBudget', budgetUsd: 2400 }))).toBe('route')
+    expect(frontendToolsForStage('budget').map((tool) => tool.name)).toEqual(['respond_to_user', 'show_budget_confirmation'])
+  })
   it.each([
     ['04/10', '2026-10-04'],
     ['04/10/2027', '2027-10-04'],

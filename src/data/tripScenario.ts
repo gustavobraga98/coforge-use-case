@@ -83,7 +83,7 @@ export const atlasTravelScenario: TripScenario = {
   id: 'new-york',
   traveler: { firstName: 'Gustavo' },
   request: {
-    naturalLanguage: 'Plan a trip for Gustavo from São Paulo to New York, November 12–16, 2026. He needs to arrive before 3 p.m. on November 12, prefers direct flights, and has a budget of up to US$3,000.',
+    naturalLanguage: 'Plan a trip for Gustavo from São Paulo to New York, November 12–16, 2026. He needs to arrive before 3 p.m. on November 12 and prefers direct flights.',
     route: {
       origin: { city: 'São Paulo', country: 'Brazil', timeZone: 'America/Sao_Paulo', latitude: -23.5505, longitude: -46.6333 },
       destination: { city: 'New York', country: 'United States', timeZone: 'America/New_York', latitude: 40.7128, longitude: -74.006 },

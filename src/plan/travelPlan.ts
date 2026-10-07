@@ -25,8 +25,9 @@ export type AssistantPlanState = {
   selectedHotelId: string | null
   status: 'planning' | 'review' | 'confirmed'
 }
-export type PlanStage = 'route' | 'dates' | 'flights' | 'stays' | 'review' | 'confirmation' | 'confirmed'
+export type PlanStage = 'budget' | 'route' | 'dates' | 'flights' | 'stays' | 'review' | 'confirmation' | 'confirmed'
 export type PlanAction =
+  | { type: 'setBudget'; budgetUsd: number }
   | { type: 'setRoute'; route: TripRoute }
   | { type: 'confirmDates'; period: z.infer<typeof periodSchema> }
   | { type: 'requestDates' }
@@ -58,6 +59,11 @@ function rebuild(state: AssistantPlanState): AssistantPlanState {
 export function applyPlanAction(state: AssistantPlanState, action: PlanAction): AssistantPlanState {
   let next = { ...state, revision: state.revision + 1 }
   if (action.type === 'reset') return { ...initialPlan(), revision: next.revision }
+  if (action.type === 'setBudget') {
+    const budgetUsd = z.number().positive().parse(action.budgetUsd)
+    if (state.budgetUsd === budgetUsd) return state
+    return rebuild({ ...next, budgetUsd, selectedFlightId: null, selectedHotelId: null, status: 'planning' })
+  }
   if (action.type === 'requestDates') return { ...next, period: null, scenario: null, selectedFlightId: null, selectedHotelId: null, status: 'planning' }
   if (action.type === 'setRoute') {
     if (JSON.stringify(state.route) === JSON.stringify(action.route)) return state
@@ -98,6 +104,7 @@ export function planSnapshot(state: AssistantPlanState) {
 
 /** The only assistant action that may be offered for the current plan state. */
 export function planStage(state: AssistantPlanState): PlanStage {
+  if (state.budgetUsd === null) return 'budget'
   if (!state.route) return 'route'
   if (!state.period) return 'dates'
   if (!state.selectedFlightId) return 'flights'

@@ -63,6 +63,7 @@ function inferredDates(messages: readonly { role: string; content: string }[]) {
 
 function nextWidget(plan: AssistantPlanState, messages: readonly { role: string; content: string }[]): AssistantGenUiWidget | null {
   const stage = planStage(plan)
+  if (stage === 'budget') return { id: newId(), name: 'show_budget_confirmation', args: { suggestedBudgetUsd: 3000 }, status: 'pending' }
   if (stage === 'route') {
     const route = inferredRoute(messages)
     return route ? { id: newId(), name: 'resolve_trip_context', args: { origin: route.origin.city, destination: route.destination.city }, status: 'pending' } : null
@@ -78,7 +79,7 @@ function nextWidget(plan: AssistantPlanState, messages: readonly { role: string;
   return null
 }
 
-const widgetOrder: Record<AssistantGenUiWidget['name'], number> = { resolve_trip_context: 0, show_date_confirmation: 1, show_trip_options: 2, show_cost_and_review: 3, request_plan_confirmation: 4, respond_to_user: 5 }
+const widgetOrder: Record<AssistantGenUiWidget['name'], number> = { show_budget_confirmation: 0, resolve_trip_context: 1, show_date_confirmation: 2, show_trip_options: 3, show_cost_and_review: 4, request_plan_confirmation: 5, respond_to_user: 6 }
 
 export function AssistantPanel({ plan, getPlan, dispatch, conversation, onConversationChange }: Props) {
   const [draft, setDraft] = useState('')
@@ -203,7 +204,7 @@ export function AssistantPanel({ plan, getPlan, dispatch, conversation, onConver
     if (!latest || (widget.status === 'pending' && latest.status !== 'pending')) return
     try {
       const next = action ? dispatch(action) : getPlan()
-      const label = action?.type === 'confirmDates' ? `Dates confirmed: ${formatDateRange(next.period!.departureDate, next.period!.returnDate)}.` : action?.type === 'confirmSimulatedPlan' ? 'Simulated plan confirmed.' : action?.type === 'selectFlight' ? 'Flight selected.' : action?.type === 'selectHotel' ? 'Stay selected.' : action?.type === 'requestReview' ? 'Plan reviewed. Confirmation is ready.' : action?.type === 'backToOptions' ? 'Returned to options.' : 'Updated the simulated plan.'
+      const label = action?.type === 'setBudget' ? `Budget set to US$${action.budgetUsd.toLocaleString('en-US')}.` : action?.type === 'confirmDates' ? `Dates confirmed: ${formatDateRange(next.period!.departureDate, next.period!.returnDate)}.` : action?.type === 'confirmSimulatedPlan' ? 'Simulated plan confirmed.' : action?.type === 'selectFlight' ? 'Flight selected.' : action?.type === 'selectHotel' ? 'Stay selected.' : action?.type === 'requestReview' ? 'Plan reviewed. Confirmation is ready.' : action?.type === 'backToOptions' ? 'Returned to options.' : 'Updated the simulated plan.'
       const result = { action: action?.type, ...planSnapshot(next) }
       if (latest.status === 'complete') {
         for (const pending of current.current.messages.flatMap((message) => message.widgets ?? [])) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { createContext, Fragment, useCallback, useContext, useEffect, useRef, useState, type FormEvent, type MutableRefObject, type ReactNode } from 'react'
 import { useAgent, useComponent, useCopilotKit, useFrontendTool, useHumanInTheLoop, useRenderTool, useRenderToolCall } from '@copilotkit/react-core/v2/headless'
 import { z } from 'zod'
 import { atlasTravelScenario, findTravelLocation, type Location } from '../data/tripScenario'
@@ -14,11 +14,33 @@ import { Badge, Button } from './ui'
 type Props = { plan: AssistantPlanState; getPlan: () => AssistantPlanState; dispatch: (action: PlanAction) => AssistantPlanState }
 const agentId = 'atlas_travel'
 const money = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
+const BudgetDraftContext = createContext<MutableRefObject<number | undefined> | null>(null)
 
 function visibleContent(content: unknown) {
   if (typeof content === 'string') return content
   if (Array.isArray(content)) return content.map((part) => typeof part === 'object' && part && 'text' in part ? String(part.text ?? '') : '').join('')
   return ''
+}
+
+function parseBudgetValue(match: RegExpMatchArray | null): number | undefined {
+  if (!match) return undefined
+  const value = Number(match[1].replace(/[.,\s]/g, ''))
+  return Number.isFinite(value) && value > 0 ? value : undefined
+}
+
+function budgetFromMessage(content: string): number | undefined {
+  const direct = content.match(/^\s*(?:US\$|USD|\$)?\s*([\d.,\s]+)\s*(?:USD|dollars?|d[oó]lares?)?\s*$/i)
+  const contextual = content.match(/\b(?:orçamento|budget|vamos\s+(?:fazer|de)|pode\s+ser|ser[aá]|tenho)\b[^\d]{0,24}([\d.,\s]+)/i)
+  const match = direct ?? contextual
+  return parseBudgetValue(match)
+}
+
+function budgetFromMessages(messages: readonly { role: string; content: unknown }[]): number | undefined {
+  const latestUserMessage = [...messages].reverse().find((message) => message.role === 'user')
+  if (!latestUserMessage) return undefined
+  const match = visibleContent(latestUserMessage.content).match(/^\s*(?:US\$|USD|\$)?\s*([\d.,\s]+)\s*(?:USD|dollars?|d[oó]lares?)?\s*$/i)
+  if (!match) return undefined
+  return parseBudgetValue(match)
 }
 
 function renderInline(text: string): ReactNode[] {
@@ -64,6 +86,18 @@ function CalendarDecision({ args, respond, plan, onApply }: { args: { departureD
   </section>
 }
 
+function BudgetDecision({ args, respond, onApply }: { args: { suggestedBudgetUsd?: number }; respond?: (value: unknown) => Promise<void>; onApply: (action: PlanAction) => unknown }) {
+  const [budgetUsd, setBudgetUsd] = useState(String(args.suggestedBudgetUsd ?? 3000))
+  const value = Number(budgetUsd)
+  return <section className="assistant-genui" aria-label="Set trip budget">
+    <h3>Set your trip budget</h3><p>What is the maximum fictional trip budget? US$3,000 is only a suggestion.</p>
+    <form onSubmit={(event) => { event.preventDefault(); if (respond && Number.isFinite(value) && value > 0) { const result = onApply({ type: 'setBudget', budgetUsd: value }); void respond({ ...result as object, budgetConfirmed: true, budgetUsd: value, assistantProgress: 'route' }) } }}>
+      <label className="assistant-budget-field">Maximum budget in USD<input required min="1" step="1" type="number" inputMode="decimal" value={budgetUsd} onChange={(event) => setBudgetUsd(event.target.value)} /></label>
+      <Button type="submit" disabled={!respond || !Number.isFinite(value) || value <= 0}>Set budget</Button>
+    </form>
+  </section>
+}
+
 function ChoiceDecision({ kind, respond, plan, onApply }: { kind: 'flights' | 'stays'; respond?: (value: unknown) => Promise<void>; plan: AssistantPlanState; onApply: (action: PlanAction) => unknown }) {
   if (!plan.scenario) return <section className="assistant-genui"><p>Confirm the route and dates to continue.</p></section>
   const scenario = plan.scenario
@@ -96,12 +130,15 @@ function ConfirmationDecision({ respond, plan, onApply }: { respond?: (value: un
 
 function AssistantTools({ plan, getPlan, dispatch }: Props) {
   const { agent } = useAgent({ agentId })
+  const budgetDraft = useContext(BudgetDraftContext)
   const sync = useCallback((next: AssistantPlanState, progress: string) => {
     agent.setState({ plan: planSnapshot(next), assistantProgress: progress })
     return { plan: planSnapshot(next), assistantProgress: progress }
   }, [agent])
   const applyDecision = useCallback((action: PlanAction) => sync(dispatch(action), planStage(getPlan())), [dispatch, getPlan, sync])
   useEffect(() => { sync(plan, planStage(plan)) }, [plan, sync])
+
+  useHumanInTheLoop({ name: 'show_budget_confirmation', description: 'Ask the human to set the maximum fictional trip budget in USD.', parameters: z.object({ suggestedBudgetUsd: z.number().positive().optional() }), agentId, render: ({ args, respond }) => <BudgetDecision args={{ suggestedBudgetUsd: budgetDraft?.current ?? budgetFromMessages(agent.messages as Array<{ role: string; content: unknown }>) ?? args.suggestedBudgetUsd }} respond={respond} onApply={applyDecision} /> })
 
   useFrontendTool({ name: 'resolve_trip_context', description: 'Apply the supplied origin and destination to the shared simulated plan and map.', parameters: z.object({ origin: z.string().min(1), destination: z.string().min(1) }), handler: async ({ origin, destination }) => {
     ensureStage(getPlan, 'route')
@@ -133,16 +170,18 @@ export function CopilotAssistantPanel(props: Props) {
   const [draft, setDraft] = useState('')
   const [error, setError] = useState<string | null>(null)
   const feed = useRef<HTMLDivElement>(null)
+  const budgetDraft = useRef<number | undefined>(undefined)
   useEffect(() => { feed.current?.scrollTo?.({ top: feed.current.scrollHeight }) }, [agent.messages.length, agent.isRunning])
   async function submit(event?: FormEvent) {
     event?.preventDefault()
     const content = draft.trim()
     if (!content || agent.isRunning) return
+    budgetDraft.current = budgetFromMessage(content)
     setError(null); agent.addMessage({ id: crypto.randomUUID(), role: 'user', content }); setDraft('')
     try { await copilotkit.runAgent({ agent }) } catch (failure) { setError(failure instanceof Error ? failure.message : 'The assistant is unavailable.') }
   }
   return <section className="assistant-panel" aria-labelledby="assistant-panel-heading">
-    <AssistantTools {...props} />
+    <BudgetDraftContext.Provider value={budgetDraft}><AssistantTools {...props} /></BudgetDraftContext.Provider>
     <div className="assistant-panel__heading"><div><h2 id="assistant-panel-heading">AI Assistant</h2><p>Plan fictional travel and choose each step together.</p></div><Badge>Simulated</Badge></div>
     <div ref={feed} className="assistant-conversation" aria-live="polite" aria-label="Assistant conversation">
       {agent.messages.length === 0 && <div className="assistant-empty-state"><p>Describe your trip to get started.</p><button className="assistant-suggestion" onClick={() => setDraft(atlasTravelScenario.request.naturalLanguage)}>Use Gustavo&apos;s fictional demo request</button></div>}
